@@ -1,0 +1,4 @@
+[mcp_servers.meritx]
+url = "https://server38.shared.spaceship.host/mcp"
+http_headers_helper = "python3 /Users/muhammadirfan/Desktop/MeritX/.codex/mcp_headers.py"
+enabled = true

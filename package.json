@@ -1,0 +1,41 @@
+{
+  "name": "meritx",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "preview": "serve out",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "check": "npm run lint && npm run typecheck",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@fontsource-variable/dm-sans": "latest",
+    "@fontsource-variable/outfit": "latest",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.6",
+    "prettier": "^3.6.2",
+    "serve": "^14.2.4",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
+  }
+}

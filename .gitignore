@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.DS_Store
+*.log
+.vercel/
+__pycache__/
