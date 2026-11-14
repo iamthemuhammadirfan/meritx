@@ -33,6 +33,8 @@ The lint toolchain pins ESLint 9 for compatibility with Next.js's React/accessib
 
 For Spaceship/cPanel hosting, upload **only the contents of `out/`** into the domain's document root. Do not upload `.env`, `.codex/`, source files or `node_modules`. Configure HTTPS and a single canonical hostname at the hosting level. With trailing slashes enabled, future routes export as directory `index.html` files. Configure the host's custom 404 page to `/404.html`; add compression and long-lived caching for fingerprinted `/_next/static/` assets at the hosting/CDN layer.
 
+`public/.htaccess` is copied into the export and configures LiteSpeed/Apache for the HTTPS apex domain, directory listing protection, the custom 404 page, compression and immutable caching of fingerprinted assets. Include this hidden file when uploading. Production builds use `SITE_INDEXABLE=true npm run build`; the example environment and CI retain draft indexing defaults.
+
 Static export is fast and compatible with ordinary shared hosting. It does not support request-time server rendering, Server Actions, API routes that require a server, ISR, or the default runtime image optimizer. For those features, remove `output: "export"`, configure a Node.js-capable host, and use `npm run build && npm start`. Use pre-sized/optimized images in the static build.
 
 SEO foundations cannot guarantee search rankings. Useful service content, crawlability, real business information, mobile performance and domain authority still matter. Submit the production sitemap to search engines after launch.
