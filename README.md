@@ -1,46 +1,67 @@
-# MeritX
+# MeritX Solutions & Consultants
 
-Local Next.js App Router project for MeritX's tender support, solutions and consultancy website at https://meritxsc.com.
+Website for **https://meritxsc.com**, built with Next.js App Router, TypeScript, Three.js and GSAP. Public pages are pre-rendered for Spaceship shared hosting. A small PHP endpoint receives contact enquiries on that hosting.
 
-## Run locally
+## Local development
 
-Requires Node.js 22 or newer. Install with `npm ci`, then run `npm run dev` and open http://localhost:3000.
+Requires Node.js 22 or newer.
 
-## Validate and build
+```sh
+npm ci
+npm run dev
+```
+
+Open http://localhost:3000. Copy `.env.example` to `.env` in a new checkout and provide private MCP credentials separately. Never commit `.env`.
+
+## Checks and production build
 
 ```sh
 npm run check
-npm run build
+SITE_INDEXABLE=true npm run build
 npm run preview
 ```
 
-`npm run build` generates a static website in `out/`. `npm run preview` serves that output locally. `npm start` is reserved for a future Node.js deployment after removing `output: "export"`; it does not serve the current static export.
+The output is in `out/`. `npm run preview` serves the static pages locally. Next.js development and static preview **do not execute PHP**, so the form backend must be verified with a PHP runtime. On an ordinary static-only host, replace the endpoint with an appropriate form service before publishing.
 
-## Structure
+The GitHub workflow installs from the lockfile, lints, typechecks and builds with indexing disabled. ESLint 9 is retained for compatibility with the Next.js React/accessibility plugins. The targeted minimatch override uses the patched 11.x release in the TypeScript parser.
 
-- `src/app/`: routes, layout, styles and metadata routes.
-- `src/lib/site.ts`: shared public site identity and indexing configuration. Server-only; never imports private MCP credentials.
-- `.codex/`: project-only MCP configuration and an authentication header helper.
-- `.env`: local configuration and private credentials, excluded from Git.
+## Pages and content
 
-## SEO and launch
+- `/`: business overview, interactive technology scene, capabilities and delivery process.
+- `/services/`: five service areas and tender/BOQ procurement information.
+- `/services/[slug]/`: individual software, equipment, networking, CCTV and installation/support pages.
+- `/about/`: company approach, principles and intended customer sectors.
+- `/contact/`: confirmed address, telephone, WhatsApp, email and enquiry form.
+- `/privacy/`: handling of enquiries and external service links.
 
-The site includes pre-rendered HTML, semantic headings, canonical metadata, Open Graph/Twitter metadata, a branded PNG social preview, Organization structured data, robots.txt and sitemap.xml. Fonts are bundled locally, with no Google Fonts request during builds or page visits.
+Shared business details live in `src/lib/business.ts`; service content lives in `src/lib/services.ts`. The site does not claim customer logos, certifications, project counts, testimonials or guaranteed tender outcomes.
 
-The lint toolchain pins ESLint 9 for compatibility with Next.js's React/accessibility plugins. A targeted minimatch override uses the patched 11.x release in the TypeScript parser; `npm audit` reports no known vulnerabilities.
+## Visuals and motion
 
-`NEXT_PUBLIC_SITE_URL=https://meritxsc.com` is the canonical origin. `SITE_INDEXABLE=false` keeps this draft out of search results. Before launch, review service descriptions, add approved contact details and any required business/legal pages, then set `SITE_INDEXABLE=true` and rebuild. This enables indexing and adds the homepage to the sitemap. Preview and draft deployments should keep it false. Rebuild after changing either variable.
+The supplied logo is preserved in `docs/brand/`; an optimised copy is served from `public/images/`. Two generated illustrative assets and their full prompts are documented in `docs/visual-assets.json`. These images do not represent actual client installations.
 
-For Spaceship/cPanel hosting, upload **only the contents of `out/`** into the domain's document root. Do not upload `.env`, `.codex/`, source files or `node_modules`. Configure HTTPS and a single canonical hostname at the hosting level. With trailing slashes enabled, future routes export as directory `index.html` files. Configure the host's custom 404 page to `/404.html`; add compression and long-lived caching for fingerprinted `/_next/static/` assets at the hosting/CDN layer.
+The home page contains a real Three.js scene of interconnected servers, a laptop, a camera and network equipment. It loads near the viewport, caps rendering resolution, stops drawing when hidden/offscreen and exposes a pause control. A generated static image remains available if WebGL cannot initialise. Reduced-motion visitors get a still scene. Geometry, materials, observers and event handlers are cleaned up on navigation.
 
-`public/.htaccess` is copied into the export and configures LiteSpeed/Apache for the HTTPS apex domain, directory listing protection, the custom 404 page, compression and immutable caching of fingerprinted assets. Include this hidden file when uploading. Production builds use `SITE_INDEXABLE=true npm run build`; the example environment and CI retain draft indexing defaults.
+GSAP handles headline entrances, section reveals, image parallax and the delivery timeline. It honours reduced-motion preferences and reverts on route changes. Content remains visible when animation JavaScript is unavailable. Fonts are bundled locally.
 
-Static export is fast and compatible with ordinary shared hosting. It does not support request-time server rendering, Server Actions, API routes that require a server, ISR, or the default runtime image optimizer. For those features, remove `output: "export"`, configure a Node.js-capable host, and use `npm run build && npm start`. Use pre-sized/optimized images in the static build.
+## Contact enquiries
 
-SEO foundations cannot guarantee search rankings. Useful service content, crawlability, real business information, mobile performance and domain authority still matter. Submit the production sitemap to search engines after launch.
+`public/api/enquiry.php` is served by Spaceship's PHP runtime. It validates input, restricts browser origins, requires consent, includes a honeypot and limits repeated submissions. It writes a private JSON record **outside the document root** under `~/.meritx-enquiries/`, with directory permissions `0700` and file permissions `0600`.
+
+The endpoint returns a receipt only after the private record is saved. Email notification to `info@meritxsc.com` is best-effort; a successful `mail()` call is not proof of inbox delivery. Mailbox and MX configuration need to be verified separately. Use the hosting account/MCP to read private enquiry records; do not expose the directory or add it to Git. The site does not add submitters to a mailing list.
+
+Backend validation was exercised in a separate private QA directory with email sending disabled, including invalid input, consent, origin checks, durable storage, private permissions and rate limiting. Do not use genuine customer information in tests.
+
+## Spaceship deployment
+
+Build with `NEXT_PUBLIC_SITE_URL=https://meritxsc.com` and `SITE_INDEXABLE=true`. Upload **only the contents of `out/`**, including `.htaccess` and `api/enquiry.php`, into the domain's document root. Do not upload source, `.env`, `.codex/`, `node_modules`, documentation or Git history.
+
+The production build is packaged, checksum-verified and transferred through the project-scoped Spaceship MCP connection. Snapshot the current site first, stage the new files outside the web folder, and replace the document root only after validating the staged release. Keep the previous release for rollback. The private enquiry directory stays outside the replaced website folder.
+
+`public/.htaccess` enforces the HTTPS apex hostname, disables directory listing, defines the custom 404 page and configures compression plus immutable caching for fingerprinted assets. Page metadata is centralised in `src/lib/metadata.ts`; the sitemap includes all public pages. Preview builds should use `SITE_INDEXABLE=false`.
 
 ## Project-only MCP
 
-`.codex/config.toml` registers the `meritx` server only inside this trusted project. `.codex/mcp_headers.py` reads `MERITX_MCP_TOKEN` from this folder's `.env` and supplies an Authorization header. No token is stored in the Codex config or frontend code. Restart the MCP connection after changing credentials. No global MCP entry is required.
+`.codex/config.toml` registers the Spaceship `meritx` server only for this trusted project. `.codex/mcp_headers.py` reads `MERITX_MCP_TOKEN` from this folder's private `.env`. No credential is imported by the frontend or stored in tracked configuration. If the project folder moves, update the helper's absolute command path.
 
-Keep `.env` private. `.env.example` contains names and public defaults only. When setting up another checkout, copy it to `.env` and supply the token privately. The helper command in `.codex/config.toml` currently uses this machine's absolute project path; update it if the folder moves.
+Static export does not support request-time Next.js SSR, Server Actions or ISR. A future migration to a Node.js host requires removing `output: "export"` and adapting the PHP endpoint. `npm start` is reserved for that Node.js deployment; the current export uses `npm run preview`.

@@ -1,0 +1,22 @@
+{
+  "generator": "Built-in image_gen tool",
+  "usage": "Illustrative concepts, not photographs of MeritX installations or client projects.",
+  "assets": [
+    {
+      "path": "public/images/technology-suite.webp",
+      "prompt": "Use case: stylized-concept. Asset type: premium enterprise technology website visual, landscape 3:2 composition. Primary request: a sophisticated photoreal 3D product still life representing integrated business technology: a low stack of dark graphite enterprise servers, an elegant brushed silver network switch, a compact white dome security camera, and a thin open silver laptop with a blank softly lit screen. Arrange as a single meticulously art-directed sculptural assembly on an architectural pale lavender platform, physically plausible proportions, generous breathing room, no clutter. Soft pearl lavender studio backdrop, warm apricot light from right, cool periwinkle reflections, restrained coral detail lights, premium tactile materials, soft contact shadows, impeccable cinematic industrial product photography. No text, no letters, no logos, no watermark, no people, no floating random cubes, no sci-fi HUD. The devices must be recognizable and realistic. Main assembly centered, space around all edges. This is illustrative imagery, not a photo of a real company's installation."
+    },
+    {
+      "path": "public/images/connected-workspace.webp",
+      "prompt": "Use case: photorealistic-natural. Asset type: wide editorial website banner for a technology solutions and IT infrastructure company. Primary request: cinematic architectural photograph of a contemporary business workspace with a professionally installed glass-front network equipment cabinet integrated into a bright modern office, a small section of structured network cabling neatly managed, adjacent slim office workstation screens seen from the back. No people. This is an illustrative concept environment rather than a real client's office. Composition: wide 16:9, eye-level architectural photography, cabinet right of center, expansive calm architecture on the left, depth and natural perspective. Materials: brushed aluminum, frosted glass, pale concrete, detailed equipment. Soft daylight with very subtle lilac and apricot reflections, restrained creative editorial grade. It should feel expensive, tangible, real and quiet. No futuristic spaceship, no neon room, no text, no readable logos, no watermark. High realism, thoughtful composition."
+    }
+  ],
+  "brand": {
+    "source": "User-supplied logo",
+    "original": "docs/brand/meritx-logo-original.png",
+    "webAsset": "public/images/meritx-logo.webp",
+    "processing": "Resized and transcoded for web delivery. The logo artwork is unchanged."
+  },
+  "live3D": "src/components/technology-scene.tsx",
+  "motion": "src/components/motion.tsx"
+}

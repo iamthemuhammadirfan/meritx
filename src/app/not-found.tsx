@@ -1,16 +1,21 @@
 import Link from "next/link";
-
+import { Arrow } from "@/components/icons";
 export default function NotFound() {
   return (
-    <main id="main" className="wrap" style={{ paddingBlock: 100 }}>
+    <main id="main" className="container section">
       <p className="eyebrow">MeritX / 404</p>
-      <h1>Page not found.</h1>
-      <p className="hero-description">
-        The page you are looking for may have moved.
+      <h1>A missing connection.</h1>
+      <p className="large-copy">
+        This page may have moved. Let’s get you back on track.
       </p>
-      <Link className="button" href="/">
-        Return to MeritX <span aria-hidden="true">↗</span>
-      </Link>
+      <div className="button-row">
+        <Link className="button" href="/">
+          Back to home <Arrow />
+        </Link>
+        <Link className="text-link" href="/services/">
+          Explore our services <Arrow />
+        </Link>
+      </div>
     </main>
   );
 }

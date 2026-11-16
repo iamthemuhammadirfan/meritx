@@ -20,8 +20,8 @@ if (
 export const site = {
   name: "MeritX",
   url: url.origin,
-  title: "MeritX | Tender Support, Solutions & Consultancy",
+  title: "MeritX | Software, IT Equipment & Infrastructure Solutions",
   description:
-    "MeritX provides tender support, bid documentation guidance, business solutions and consultancy to help you approach opportunities with clarity.",
+    "MeritX Solutions & Consultants provides software development, IT equipment, networking, CCTV installation and technical support. Based in Johar Town, Lahore.",
   indexable: process.env.SITE_INDEXABLE === "true",
 } as const;
