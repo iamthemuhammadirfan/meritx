@@ -18,7 +18,9 @@ export default function PrivacyPage() {
       <h2>Information you provide</h2>
       <p>
         Our enquiry form collects your name, email address, selected service and
-        message. You may also provide a company name and phone number. Please do
+        message. You may also provide a company name, phone number, project
+        stage, existing systems, budget, delivery location, setup needs,
+        required-by date or tender reference and submission deadline. Please do
         not submit passwords, payment details, identity documents or other
         sensitive information through this form.
       </p>

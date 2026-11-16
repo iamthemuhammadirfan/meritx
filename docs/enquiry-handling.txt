@@ -3,7 +3,10 @@ MERITX WEBSITE ENQUIRIES
 1. Read incoming enquiries
 Open https://www.spacemail.com and sign in to info@meritxsc.com.
 Notifications have a subject such as “MeritX enquiry MX-20261116-B611F743”.
-The email contains the name, visitor email, company, phone (if supplied), service and message.
+The email contains the name, visitor email, company, phone (if supplied), service and requirements.
+Optional fields follow the selected enquiry type: software stage, existing tools and budget;
+equipment delivery location, required-by date and setup needs; tender reference, location and deadline.
+Tender deadlines use Pakistan time (PKT, UTC+5 / Asia/Karachi).
 The Reply-To header points to the visitor's submitted email, so Reply addresses the visitor.
 
 2. Retrieve the private backup
@@ -15,7 +18,9 @@ Use View to read a record or Download to keep a copy. Do not move this folder in
 Files beginning .rate- are spam-limiting state, not enquiries.
 
 3. Understand notification status
-Each record includes the original submitted fields and a notification object.
+Each record includes the original submitted fields, a project_details object and a notification object.
+Records with a tender deadline also contain submission_timezone = Asia/Karachi.
+Older enquiries remain valid and may not contain these additional fields.
 “accepted” means PHP's hosting mail transport accepted the notification, not a guarantee of final inbox placement.
 “not_accepted” means the email attempt was not accepted; the saved enquiry still exists.
 If a notification is missing, search Spam/Junk and the reference before asking for another submission.
