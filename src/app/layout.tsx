@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/outfit";
-import "@fontsource-variable/dm-sans";
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/source-sans-3";
 import "./globals.css";
 import { site } from "@/lib/site";
 import { SiteHeader } from "@/components/site-header";

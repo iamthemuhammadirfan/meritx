@@ -1,166 +1,150 @@
 import { pageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Arrow } from "@/components/icons";
 import { CtaSection } from "@/components/cta-section";
-import {
-  Building2,
-  HardHat,
-  Landmark,
-  Focus,
-  Layers3,
-  Handshake,
-} from "lucide-react";
+import { EngineeringDiagram } from "@/components/engineering-diagram";
+import { Building2, HardHat, Landmark } from "lucide-react";
+import styles from "@/components/engineering-pages.module.css";
 
 export const metadata: Metadata = pageMetadata(
   "About MeritX Solutions & Consultants",
-  "Meet MeritX, a Lahore-based solutions and consultancy business connecting software, IT equipment, networking, security and installation for organisations.",
+  "MeritX is an engineering-led technology company in Lahore. We develop software, supply IT equipment and install networks and CCTV for corporate, construction and public-sector requirements.",
   "/about/",
 );
 export default function AboutPage() {
   return (
     <main id="main">
-      <section className="page-hero container">
-        <p className="eyebrow">About MeritX</p>
-        <h1>
-          <span className="line-clip">
-            <span data-hero-line>Technology is the tool.</span>
-          </span>
-          <span className="line-clip">
-            <span className="gradient-text" data-hero-line>
-              Your business is the point.
-            </span>
-          </span>
-        </h1>
-        <div className="page-hero-bottom">
-          <p>
-            We’re MeritX Solutions & Consultants. Based in Lahore, we bring
-            practical thinking to the software, equipment and infrastructure
-            your organisation depends on.
-          </p>
-          <span className="page-index">Clear advice. Considered delivery.</span>
+      <section className={styles.hero}>
+        <div className={`container ${styles.heroGrid}`}>
+          <div>
+            <p className="eyebrow">About MeritX</p>
+            <h1>
+              We design, supply
+              <br />
+              <span className="gradient-text">and install IT systems.</span>
+            </h1>
+            <p>
+              MeritX Solutions & Consultants is an engineering-led team based in
+              Lahore. We work on business software, IT equipment, networking and
+              CCTV—from the initial requirement through installation and
+              testing.
+            </p>
+            <Link className="button" href="/services/">
+              See our engineering services <Arrow />
+            </Link>
+          </div>
+          <EngineeringDiagram />
         </div>
       </section>
-      <div className="container about-panorama">
-        <Image
-          src="/images/connected-workspace.webp"
-          alt="AI-generated architectural concept showing a network cabinet integrated into a modern workspace"
-          width={1672}
-          height={941}
-          loading="eager"
-          data-parallax
-        />
-        <span>Illustrative workspace concept</span>
-      </div>
-      <section className="section container about-story">
+      <section className={`container ${styles.story}`}>
         <div data-reveal>
-          <p className="eyebrow">Why MeritX</p>
+          <p className="eyebrow">What we do</p>
           <h2>
-            Different systems.
+            The software and
             <br />
-            <span className="text-muted">One shared purpose.</span>
+            the systems behind it.
           </h2>
         </div>
         <div data-reveal>
-          <p className="large-copy">
-            Businesses rarely need technology in isolation. A new office needs
-            devices, connectivity and secure access. A project team needs the
-            right equipment and someone to get it working.
+          <p>
+            An office rollout can involve laptops, network points, Wi-Fi and
+            business applications. A construction site may need an IT setup and
+            cameras before the team moves in. We scope these requirements
+            together so equipment selection, software and installation are
+            coordinated.
           </p>
           <p>
-            MeritX brings those requirements together. We work across software
-            solutions, IT equipment supply, networking, surveillance and
-            technical implementation, helping you move from a requirement to a
-            practical plan.
+            Our work includes developing web applications and internal tools,
+            sourcing equipment against technical specifications, running network
+            cabling, configuring devices and setting up camera recording and
+            viewing.
           </p>
           <p>
-            Some projects begin with a tender. Others start with a referral or a
-            conversation. In every case, we look closely at what you need,
-            define the scope and keep the commercial and technical details
-            clear.
+            We take enquiries through direct contact, referrals and tender
+            requests. Bring us a problem, a site plan or a BOQ. We review the
+            requirements with your team and prepare a technical and commercial
+            proposal.
           </p>
-          <Link className="text-link" href="/services/">
-            Explore what we do <Arrow />
-          </Link>
         </div>
       </section>
-      <section className="principles-section">
+      <section className={styles.process}>
         <div className="container">
-          <div className="section-heading" data-reveal>
+          <div className={styles.processHeader} data-reveal>
             <div>
-              <p className="eyebrow">How we think</p>
+              <p className="eyebrow">How we deliver</p>
               <h2>
-                Good work starts
+                Engineering work,
                 <br />
-                with good principles.
+                with a defined scope.
               </h2>
             </div>
-            <p className="section-intro">
-              The practical choices that guide how we approach a requirement and
-              work with your team.
+            <p>
+              Before work begins, we agree what is being supplied or built, how
+              it will be installed and what will be tested at handover.
             </p>
           </div>
-          <div className="principle-grid">
+          <div className={styles.processGrid}>
             {[
               {
-                Icon: Focus,
-                title: "Understand before recommending.",
-                text: "We ask about the people, site, budget and operational needs behind a specification. The right solution starts with the right questions.",
+                title: "Review the requirement",
+                text: "We discuss the users, applications, site conditions and budget. For site installations, we confirm layout, cable routes, equipment positions and access.",
               },
               {
-                Icon: Layers3,
-                title: "See the whole setup.",
-                text: "Supply, installation and everyday use belong in the same conversation. We consider how the pieces will work together.",
+                title: "Specify & quote",
+                text: "The proposal sets out equipment or software features, quantities, configuration work and delivery dates. Supply and installation costs are identified.",
               },
               {
-                Icon: Handshake,
-                title: "Make the details clear.",
-                text: "Specifications, quotations, responsibilities and support terms should be understandable. We define them before the work begins.",
+                title: "Build & install",
+                text: "We develop the agreed software or source and configure the equipment. On-site work is scheduled around access and operating requirements.",
               },
-            ].map(({ Icon, title, text }) => (
-              <article key={title} data-reveal>
-                <Icon size={30} strokeWidth={1.4} />
-                <h3>{title}</h3>
-                <p>{text}</p>
+              {
+                title: "Test & hand over",
+                text: "We check the agreed functions and connections, provide the relevant configuration or user guidance, and confirm support responsibilities.",
+              },
+            ].map((step, i) => (
+              <article key={step.title} data-reveal>
+                <span className={styles.step}>{i + 1}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
-      <section className="section container sectors-section">
+      <section className={`container ${styles.sectors}`}>
         <div data-reveal>
           <p className="eyebrow">Who we work with</p>
           <h2>
-            For the people
+            Offices, project sites
             <br />
-            moving business forward.
+            and procurement teams.
           </h2>
           <p>
-            Different organisations. Different requirements. The same need for
-            technology that does its job.
+            We scope work for the location, the people using the system and the
+            way the organisation buys.
           </p>
         </div>
-        <div className="sector-list">
+        <div>
           {[
             {
               Icon: Building2,
-              title: "Corporate organisations",
-              text: "Workplace equipment, business applications and connected office infrastructure.",
+              title: "Corporate teams",
+              text: "Business applications, staff equipment, office networks and equipment refreshes. We can include device setup and deployment in the supply proposal.",
             },
             {
               Icon: HardHat,
-              title: "Construction & project teams",
-              text: "Site mobilisation, IT equipment, networking and surveillance for project locations.",
+              title: "Construction groups",
+              text: "Site-office IT equipment, network connections and CCTV installation. Access, power, cabling and the mobilisation schedule are part of the installation brief.",
             },
             {
               Icon: Landmark,
-              title: "Public-sector buyers",
-              text: "Specification-led quotations, tender requirements and clearly scoped supply and installation.",
+              title: "Public-sector procurement",
+              text: "BOQ-based quotations and specification-led supply. We review the technical requirements, quantities, required documentation and submission dates before quoting.",
             },
           ].map(({ Icon, title, text }) => (
-            <article key={title} data-reveal>
-              <Icon size={25} strokeWidth={1.4} />
+            <article className={styles.sector} key={title} data-reveal>
+              <Icon size={29} strokeWidth={1.5} />
               <div>
                 <h3>{title}</h3>
                 <p>{text}</p>
@@ -169,7 +153,17 @@ export default function AboutPage() {
           ))}
         </div>
       </section>
-      <CtaSection title="A better setup starts\nwith a conversation." />
+      <div className={`container ${styles.location}`}>
+        <p>
+          <strong>Based in Lahore</strong>
+          <br />
+          544-G1 Johar Town, Lahore
+        </p>
+        <Link className="text-link" href="/contact/">
+          Contact our team <Arrow />
+        </Link>
+      </div>
+      <CtaSection title="Discuss your software\nor site requirements." />
     </main>
   );
 }

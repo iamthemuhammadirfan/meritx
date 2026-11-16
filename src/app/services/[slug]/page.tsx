@@ -10,6 +10,7 @@ import { services } from "@/lib/services";
 import { Arrow, ServiceIcon } from "@/components/icons";
 import { CtaSection } from "@/components/cta-section";
 import { site } from "@/lib/site";
+import styles from "@/components/engineering-pages.module.css";
 
 export const dynamicParams = false;
 export function generateStaticParams() {
@@ -60,7 +61,9 @@ export default async function ServicePage({ params }: Props) {
           __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
         }}
       />
-      <section className={`detail-hero tint-${service.color}`}>
+      <section
+        className={`detail-hero tint-${service.color} ${styles.detailHero}`}
+      >
         <div className="container">
           <nav className="breadcrumb" aria-label="Breadcrumb">
             <Link href="/">Home</Link>
@@ -93,14 +96,10 @@ export default async function ServicePage({ params }: Props) {
       </section>
       <section className="section container detail-intro">
         <p className="eyebrow" data-reveal>
-          Designed around the requirement
+          Service overview
         </p>
         <div data-reveal>
-          <h2>
-            A practical solution starts
-            <br />
-            with a closer look.
-          </h2>
+          <h2>{service.introTitle}</h2>
           <p className="large-copy">{service.intro}</p>
           <p className="fit-note">{service.fit}</p>
         </div>
@@ -183,8 +182,8 @@ export default async function ServicePage({ params }: Props) {
       </section>
       <section className="section container faq-section">
         <div data-reveal>
-          <p className="eyebrow">A few things to know</p>
-          <h2>Before we get started.</h2>
+          <p className="eyebrow">Project questions</p>
+          <h2>Scope, pricing and support.</h2>
         </div>
         <div>
           {service.questions.map(({ q, a }) => (
@@ -199,7 +198,7 @@ export default async function ServicePage({ params }: Props) {
         </div>
       </section>
       <section className="container related-services">
-        <h2>Part of a bigger picture.</h2>
+        <h2>Related services.</h2>
         <div>
           {services
             .filter((s) => s.slug !== slug)
@@ -213,7 +212,7 @@ export default async function ServicePage({ params }: Props) {
             ))}
         </div>
       </section>
-      <CtaSection title="Let’s turn your requirement\ninto a working solution." />
+      <CtaSection title="Discuss your scope\nwith our engineers." />
     </main>
   );
 }

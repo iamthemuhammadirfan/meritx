@@ -12,14 +12,14 @@ export type ServiceContent = {
 export const serviceContent: Record<string, ServiceContent> = {
   "software-solutions": {
     seoTitle: "Custom Software Development in Lahore",
-    heading: "Software built around your business.",
+    heading: "Business software & workflow automation.",
     description:
       "Custom software development in Lahore: business web applications, internal portals, reporting and workflow automation. Discuss scope, integrations and deployment with MeritX.",
     image: "/images/connected-workspace.webp",
     alt: "Illustrative connected office environment for business software and infrastructure",
-    planningTitle: "Define the workflow before the feature list.",
+    planningTitle: "Workflow, users and integration requirements.",
     planningText:
-      "A useful software brief describes the people doing the work, the information they use and where the current process slows them down. We turn those requirements into a defined scope before discussing implementation.",
+      "We review the current process with your team: who enters information, who approves it and which reports are needed. The development scope identifies the screens, permissions, data and integrations to be delivered.",
     checks: [
       "User roles, approvals and access requirements",
       "Existing systems and available integration options",
@@ -39,14 +39,14 @@ export const serviceContent: Record<string, ServiceContent> = {
   },
   "it-equipment": {
     seoTitle: "IT Equipment Supplier in Lahore",
-    heading: "IT equipment for the way you work.",
+    heading: "Business IT equipment supply.",
     description:
       "IT equipment supplier in Lahore for business laptops, desktops, workstations, servers and peripherals. Request a BOQ-based quotation with warranty and installation details.",
     image: "/images/business-laptop-fleet.webp",
     alt: "Illustrative business laptops, a workstation and docking equipment",
-    planningTitle: "Compare the specification, not just the price.",
+    planningTitle: "Models, configurations and warranty details.",
     planningText:
-      "A useful equipment quotation identifies the exact configuration, quantities and delivery scope. We help corporate buyers, construction groups and public-sector teams review those details before committing to a supply.",
+      "We quote against the required model or technical specification, quantities and delivery locations. Where alternatives are allowed, we list them separately with their configuration and warranty details.",
     checks: [
       "Exact model and configuration against the requirement",
       "Quantities, location and phased delivery needs",
@@ -66,14 +66,14 @@ export const serviceContent: Record<string, ServiceContent> = {
   },
   "networking-infrastructure": {
     seoTitle: "Office Networking & Wi-Fi Installation in Lahore",
-    heading: "A network planned for your workplace.",
+    heading: "Office networking & Wi-Fi installation.",
     description:
       "Office networking in Lahore: structured cabling, Wi-Fi installation, switches, routers and rack setup. Plan a new office network or review an existing setup with MeritX.",
     image: "/images/network-installation.webp",
     alt: "AI-generated concept of a technician organising structured cabling and network equipment",
-    planningTitle: "Start with the building and the users.",
+    planningTitle: "Site layout, network points and coverage.",
     planningText:
-      "The number of connected devices is only part of the brief. Floor layouts, working areas, meeting rooms, internet services and future expansion all affect how a network should be planned.",
+      "We review floor plans, device counts, meeting rooms and the existing internet connection. The installation plan identifies cable routes, data points, switching capacity, Wi-Fi equipment and rack locations.",
     checks: [
       "Floor layout, cable routes and required network points",
       "Staff devices, meeting spaces and Wi-Fi coverage needs",
@@ -93,14 +93,14 @@ export const serviceContent: Record<string, ServiceContent> = {
   },
   "cctv-surveillance": {
     seoTitle: "CCTV Camera Installation in Lahore",
-    heading: "CCTV planned around your premises.",
+    heading: "CCTV camera installation.",
     description:
       "CCTV camera installation in Lahore for offices, warehouses and project sites. Discuss camera coverage, NVR/DVR recording, storage, remote viewing and installation with MeritX.",
     image: "/images/network-installation.webp",
     alt: "Illustrative commercial premises with network equipment and a dome security camera",
-    planningTitle: "Decide what you need to see.",
+    planningTitle: "Camera positions, lighting and recording.",
     planningText:
-      "Coverage starts with the areas that matter: entrances, working spaces, storage locations and the movement around a site. Lighting, mounting positions and recording expectations should guide equipment selection.",
+      "We identify the areas to cover, check lighting and mounting locations, and confirm the required recording period. These details determine the cameras, recorder, storage and cabling in the proposal.",
     checks: [
       "Required viewing areas, camera positions and lighting",
       "Recorder type, camera count and storage expectations",
@@ -120,14 +120,14 @@ export const serviceContent: Record<string, ServiceContent> = {
   },
   "installation-support": {
     seoTitle: "IT Installation & Technical Support in Lahore",
-    heading: "Equipment delivered. Systems working.",
+    heading: "IT installation & technical support.",
     description:
       "IT installation and technical support in Lahore: office device rollouts, configuration, network troubleshooting and handover. Agree a practical implementation and support scope with MeritX.",
     image: "/images/network-installation.webp",
     alt: "Illustrative technician configuring commercial network infrastructure",
-    planningTitle: "Agree what a working setup means.",
+    planningTitle: "Installation scope and acceptance checks.",
     planningText:
-      "Installation is easier to assess when the required result is defined. We discuss which devices, applications and connections need to work, who is responsible for access and what will be checked before handover.",
+      "We list the devices, applications and connections to be configured, confirm account access and licensing, and agree the installation schedule. Acceptance checks are defined against those tasks.",
     checks: [
       "Equipment list, software and configuration requirements",
       "Site access, installation schedule and disruption limits",
@@ -141,7 +141,7 @@ export const serviceContent: Record<string, ServiceContent> = {
       },
       {
         title: "Support with responsibilities made clear.",
-        text: "Troubleshooting, planned maintenance and ongoing technical assistance can be discussed against the systems you operate. Coverage, response arrangements and exclusions are stated in the proposal. We do not assume a round-the-clock service or an unlimited support commitment where these have not been agreed.",
+        text: "Troubleshooting, planned maintenance and ongoing technical assistance can be discussed against the systems you operate. Coverage, response arrangements and exclusions are stated in the proposal. The support proposal identifies the covered systems, contact route and maintenance tasks.",
       },
     ],
   },

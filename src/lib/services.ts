@@ -1,15 +1,20 @@
 export const services = [
   {
     slug: "software-solutions",
+    acceptance:
+      "We test the agreed workflows, user permissions and integrations, deploy the application and provide user guidance. Hosting and maintenance responsibilities are defined in the proposal.",
+    example:
+      "An internal portal for job requests, approval steps and management reporting.",
+    introTitle: "Applications, workflows and integrations.",
     shortName: "Software",
-    title: "Software that fits the way you work.",
+    title: "Software development & automation",
     name: "Software & business systems",
     icon: "code",
     color: "blue",
     summary:
-      "Custom applications, business websites and connected workflows that turn everyday complexity into a simpler way of working.",
+      "We develop business websites, web applications, internal portals and reporting tools. The scope covers user roles, data entry, approvals and connections to existing systems.",
     intro:
-      "Your software should follow your business, not the other way around. We work with your team to understand the process, define the right solution and build software that people can actually use.",
+      "We map the process your team needs to run, define the users and data, and agree the features before development. Work can include an internal application, a customer portal, a reporting dashboard or an integration with an existing system.",
     scope: [
       "Business websites & web applications",
       "Internal portals & management systems",
@@ -36,15 +41,20 @@ export const services = [
   },
   {
     slug: "it-equipment",
+    acceptance:
+      "We check the supplied models, configurations and quantities against the order. Where setup is included, we configure and test the devices and provide the relevant warranty details.",
+    example:
+      "Laptops, monitors and docking equipment for a new office, with device setup included.",
+    introTitle: "Equipment selected against the workload.",
     shortName: "Equipment",
-    title: "The right equipment. A considered investment.",
+    title: "IT equipment supply & procurement",
     name: "IT equipment & procurement",
     icon: "monitor",
     color: "peach",
     summary:
-      "Laptops, desktops, servers and IT essentials, sourced against your specifications with clear pricing and deployment in mind.",
+      "We supply laptops, desktops, workstations, servers, storage and peripherals. Quotations identify the configuration, quantities, warranty and any setup or installation work.",
     intro:
-      "A good purchase starts with the right specification. We help corporate teams, construction groups and public-sector buyers identify suitable IT equipment, compare options and plan delivery around the job it needs to do.",
+      "We review the applications your team uses, the required specifications and the available budget. We then source suitable equipment and prepare an itemised quotation. BOQ-based supply can include alternatives where the buyer permits them.",
     scope: [
       "Laptops, desktops & workstations",
       "Servers, storage & peripherals",
@@ -71,15 +81,20 @@ export const services = [
   },
   {
     slug: "networking-infrastructure",
+    acceptance:
+      "We check the agreed network points and device connections, label installed connections and hand over the relevant configuration details. The testing scope is confirmed before installation.",
+    example:
+      "A site-office network with labelled data points, Wi-Fi coverage and a configured equipment rack.",
+    introTitle: "Cabling, Wi-Fi and network configuration.",
     shortName: "Networks",
-    title: "Connected spaces. Less friction.",
+    title: "Network design & installation",
     name: "Networking & infrastructure",
     icon: "network",
     color: "mint",
     summary:
-      "Structured cabling, switching, routing and Wi-Fi that connect your people, devices and business systems.",
+      "We plan and install structured cabling, network points, switches, routers and Wi-Fi. Work includes rack organisation, device configuration and troubleshooting existing connections.",
     intro:
-      "From an office network to a new project location, we plan connectivity around your layout, users and operational needs. The aim is a well-organised installation that is practical to use, maintain and expand.",
+      "We assess the site layout, connected devices, cable routes and coverage requirements. The network plan identifies equipment locations and configuration work. Installation can include cabling, patching, switching, routing and wireless access points.",
     scope: [
       "Structured cabling & network points",
       "Switches, routers & Wi-Fi deployment",
@@ -106,15 +121,20 @@ export const services = [
   },
   {
     slug: "cctv-surveillance",
+    acceptance:
+      "We check camera views, recording and playback, and demonstrate viewing access. Account ownership and access details are handed over to the authorised person.",
+    example:
+      "Cameras covering site entrances and storage areas, with recorder setup and authorised viewing access.",
+    introTitle: "Camera coverage, recording and viewing.",
     shortName: "Security",
-    title: "A clearer view of the places that matter.",
+    title: "CCTV supply & installation",
     name: "CCTV & surveillance",
     icon: "camera",
     color: "lavender",
     summary:
-      "Camera systems planned for your premises, with installation, recording setup and a clear handover.",
+      "We select and install cameras, cabling, recorders and storage for offices, warehouses and project sites. Configuration covers recording schedules and viewing access for authorised users.",
     intro:
-      "Effective surveillance starts with understanding a site. We consider entry points, working areas, lighting and recording needs to propose camera equipment and an installation layout suited to your premises.",
+      "We review the areas to be covered, lighting, mounting positions and recording requirements. We then specify cameras, recorder capacity, storage, cabling and power arrangements. Remote viewing can be included where the equipment and site connection support it.",
     scope: [
       "Camera selection & coverage planning",
       "Cabling, mounting & installation",
@@ -141,15 +161,20 @@ export const services = [
   },
   {
     slug: "installation-support",
+    acceptance:
+      "We check the agreed devices and functions with your team and record the handover. Any ongoing support coverage, response arrangements and exclusions are stated in the proposal.",
+    example:
+      "Configuring staff computers, connecting shared printers and checking access to business applications.",
+    introTitle: "Device setup, fault finding and handover.",
     shortName: "Support",
-    title: "From delivery to a working setup.",
+    title: "IT installation & technical support",
     name: "Installation & technical support",
     icon: "settings",
     color: "sand",
     summary:
-      "Equipment configuration, on-site implementation and practical technical support that help your investment get to work.",
+      "We configure devices, connect peripherals, install agreed software and troubleshoot IT systems. Support work is scoped around the equipment, applications and sites you operate.",
     intro:
-      "The project is not finished when a box arrives. We help bring equipment, software and infrastructure together, test the agreed scope and leave your team with a clear understanding of what has been installed.",
+      "We agree the devices, applications and connections to be configured, then plan the work around site access and business operations. The task may be a new equipment rollout, a defined fault investigation or scheduled maintenance on an existing installation.",
     scope: [
       "Office & project-site equipment rollouts",
       "Device configuration & system setup",

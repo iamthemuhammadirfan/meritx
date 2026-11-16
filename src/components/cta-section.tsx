@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Arrow } from "./icons";
 export function CtaSection({
-  title = "What’s your next\ntechnology challenge?",
+  title = "Discuss your\nproject requirements.",
 }: {
   title?: string;
 }) {
@@ -9,7 +9,7 @@ export function CtaSection({
     <section className="cta-section">
       <div className="container cta-inner">
         <div data-reveal>
-          <p className="eyebrow">Let’s make it work</p>
+          <p className="eyebrow">Project enquiries</p>
           <h2>
             {title
               .replace(/\\n/g, "\n")
@@ -22,9 +22,8 @@ export function CtaSection({
               ))}
           </h2>
           <p>
-            A new system, an equipment requirement or a project on the horizon.
-            <br className="desktop-break" /> Start with a conversation. We’ll
-            help you work out the next step.
+            Share your equipment list, site details or software requirements.
+            Our team will review the scope and contact you to discuss it.
           </p>
         </div>
         <Link

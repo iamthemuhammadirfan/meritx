@@ -12,9 +12,9 @@ export function SiteFooter() {
           <div className="footer-brand">
             <BrandLogo />
             <p>
-              Software, equipment and infrastructure.
+              Software development, IT supply,
               <br />
-              Brought together, thoughtfully.
+              networks and CCTV installation.
             </p>
             <a href={`mailto:${business.email}`} className="footer-email">
               {business.email}
@@ -67,7 +67,7 @@ export function SiteFooter() {
           <p>
             © {new Date().getFullYear()} {business.fullName}.
           </p>
-          <p>Built around your business.</p>
+          <p>Lahore, Pakistan.</p>
           <Link href="/privacy/">Privacy</Link>
         </div>
       </div>

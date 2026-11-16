@@ -138,7 +138,7 @@
 }
 .coreDetail {
   color: #42627c;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
 }
 .node {
@@ -161,13 +161,13 @@
 }
 .node strong {
   font-family: var(--display);
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: -0.3px;
   font-weight: 500;
   color: #133653;
 }
 .node > div > span {
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.5;
   color: #627d92;
   white-space: nowrap;
@@ -212,7 +212,7 @@
   border-radius: 5px;
   min-height: 36px;
   padding: 8px 11px;
-  font-size: 10px;
+  font-size: 14px;
   color: #42627c;
 }
 .control:hover {
@@ -251,10 +251,10 @@
     padding: 14px 11px;
   }
   .node strong {
-    font-size: 12px;
+    font-size: 15px;
   }
   .node > div > span {
-    font-size: 8px;
+    font-size: 14px;
   }
   .nodeIcon {
     width: 25px;
@@ -268,7 +268,7 @@
     font-size: 28px;
   }
   .coreDetail {
-    font-size: 11px;
+    font-size: 14px;
   }
   .infrastructure {
     right: -2%;
@@ -291,10 +291,10 @@
     gap: 6px;
   }
   .node strong {
-    font-size: 11px;
+    font-size: 15px;
   }
   .node > div > span {
-    font-size: 7px;
+    font-size: 14px;
   }
   .nodeIcon {
     width: 23px;
@@ -308,7 +308,7 @@
     font-size: 25px;
   }
   .coreDetail {
-    font-size: 10px;
+    font-size: 14px;
   }
   .coreRule {
     margin-block: 10px;
@@ -346,7 +346,7 @@
     font-size: 27px;
   }
   .coreDetail {
-    font-size: 11px;
+    font-size: 14px;
   }
   .node {
     gap: 5px;
@@ -354,10 +354,10 @@
     border-radius: 7px;
   }
   .node strong {
-    font-size: 12px;
+    font-size: 15px;
   }
   .node > div > span {
-    font-size: 7px;
+    font-size: 14px;
   }
   .nodeIcon {
     width: 23px;
@@ -402,7 +402,7 @@
     font-size: 23px;
   }
   .coreDetail {
-    font-size: 10px;
+    font-size: 14px;
   }
   .coreRule {
     margin-block: 10px;
@@ -412,10 +412,10 @@
     gap: 4px;
   }
   .node strong {
-    font-size: 10px;
+    font-size: 15px;
   }
   .node > div > span {
-    font-size: 6px;
+    font-size: 14px;
   }
   .nodeIcon {
     width: 20px;
@@ -424,5 +424,21 @@
   .nodeIcon > svg {
     width: 16px;
     height: 16px;
+  }
+}
+@media (max-width: 1150px) {
+  .node > div > span {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .node strong {
+    font-size: 14px;
+  }
+  .coreDetail {
+    font-size: 14px;
+  }
+  .node {
+    padding: 14px 10px;
   }
 }

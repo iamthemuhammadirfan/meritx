@@ -2,12 +2,12 @@
   --ink: #092c50;
   --blue: #087ecb;
   --orange: #ff8b13;
-  --muted: #637183;
+  --muted: #4e6377;
   --paper: #fff;
   --line: #e2e7ed;
   --soft: #f5f7fa;
-  --display: "Outfit Variable", sans-serif;
-  --body: "DM Sans Variable", sans-serif;
+  --display: "Manrope Variable", sans-serif;
+  --body: "Source Sans 3 Variable", sans-serif;
 }
 * {
   box-sizing: border-box;
@@ -73,7 +73,7 @@ h2,
 h3,
 h4 {
   font-family: var(--display);
-  font-weight: 500;
+  font-weight: 600;
 }
 h1,
 h2,
@@ -96,7 +96,7 @@ h3 {
   margin-bottom: 16px;
 }
 p {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.8;
   color: var(--muted);
 }
@@ -122,10 +122,10 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 9px;
-  text-transform: uppercase;
-  letter-spacing: 1.7px;
+  text-transform: none;
+  letter-spacing: 0.04em;
   font-weight: 650;
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.6;
   margin-bottom: 23px;
   color: var(--ink);
@@ -174,14 +174,15 @@ button:disabled {
   border-radius: 7px;
   background: var(--ink);
   color: white;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.5;
   transition:
     background 0.25s,
     color 0.25s,
     transform 0.25s;
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 100%;
 }
 .button:hover {
   background: #0a5388;
@@ -191,7 +192,7 @@ button:disabled {
 .button-small {
   min-height: 44px;
   padding: 11px 18px;
-  font-size: 12px;
+  font-size: 16px;
   gap: 20px;
 }
 .button-outline {
@@ -216,7 +217,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   gap: 18px;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.6;
   font-weight: 650;
   padding-block: 6px;
@@ -286,7 +287,7 @@ button:disabled {
   margin-right: 35px;
 }
 .desktop-nav a {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 550;
   padding-block: 14px;
   position: relative;
@@ -359,7 +360,7 @@ button:disabled {
 }
 .hero-copy .eyebrow {
   margin-bottom: 28px;
-  font-size: 9px;
+  font-size: 14px;
 }
 .home-hero h1 {
   font-size: clamp(74px, 8vw, 118px);
@@ -370,7 +371,7 @@ button:disabled {
 }
 .hero-description {
   max-width: 400px;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.8;
   margin-bottom: 31px;
 }
@@ -378,7 +379,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 10px;
+  font-size: 14px;
   color: #697586;
   margin-top: 34px;
 }
@@ -394,7 +395,7 @@ button:disabled {
   justify-content: space-between;
   position: relative;
   border-top: 1px solid #c6d5e472;
-  font-size: 10px;
+  font-size: 14px;
   color: #617286;
   letter-spacing: 0.2px;
 }
@@ -439,7 +440,7 @@ button:disabled {
 .scene-label {
   position: absolute;
   z-index: 3;
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 0.4px;
   pointer-events: none;
 }
@@ -477,7 +478,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
+  font-size: 14px;
   color: var(--ink);
   padding: 8px 10px;
 }
@@ -496,7 +497,7 @@ button:disabled {
   padding-block: 33px;
 }
 .audience-inner > p {
-  font-size: 11px;
+  font-size: 17px;
   line-height: 1.5;
   margin: 0;
 }
@@ -508,7 +509,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 12px;
+  font-size: 16px;
   color: #4f6277;
 }
 .audience-inner svg {
@@ -529,12 +530,12 @@ button:disabled {
   margin-bottom: 0;
 }
 .section-intro {
-  font-size: 14px;
+  font-size: 17px;
   max-width: 420px;
   padding-bottom: 2px;
 }
 .section-intro > p {
-  font-size: 14px;
+  font-size: 17px;
   margin-bottom: 16px;
 }
 .capability-grid {
@@ -604,14 +605,14 @@ button:disabled {
   letter-spacing: -1.2px;
 }
 .card-copy > p:last-child {
-  font-size: 13px;
+  font-size: 17px;
   line-height: 1.75;
   margin-bottom: 0;
   max-width: 330px;
 }
 .card-copy .eyebrow {
-  font-size: 9px;
-  letter-spacing: 1.3px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
   margin-bottom: 14px;
 }
 .equipment-card > img {
@@ -652,7 +653,7 @@ button:disabled {
   padding-top: 16px;
 }
 .compact-card .card-copy p {
-  font-size: 12px;
+  font-size: 17px;
 }
 .tint-blue {
   background: #edf3ff;
@@ -819,7 +820,7 @@ button:disabled {
   color: white;
 }
 .image-story p:not(.eyebrow) {
-  font-size: 15px;
+  font-size: 17px;
   max-width: 370px;
   color: #dfebf6;
   margin-bottom: 28px;
@@ -828,7 +829,7 @@ button:disabled {
   position: absolute;
   bottom: 22px;
   right: 35px;
-  font-size: 9px;
+  font-size: 14px;
   color: #e2e8ef;
   z-index: 3;
 }
@@ -845,7 +846,7 @@ button:disabled {
 }
 .process-intro > p:not(.eyebrow) {
   max-width: 365px;
-  font-size: 14px;
+  font-size: 17px;
   margin-block: 26px 22px;
 }
 .process-steps {
@@ -882,12 +883,12 @@ button:disabled {
   border-radius: 100%;
   display: grid;
   place-items: center;
-  font-size: 9px;
+  font-size: 14px;
   color: #7f8a98;
   z-index: 2;
 }
 .process-step .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   color: #7b8a9a;
   margin-bottom: 14px;
 }
@@ -896,7 +897,7 @@ button:disabled {
   margin-bottom: 14px;
 }
 .process-step > p:last-child {
-  font-size: 13px;
+  font-size: 17px;
   margin-bottom: 0;
 }
 .process-step:last-child {
@@ -926,7 +927,7 @@ button:disabled {
   max-width: 680px;
 }
 .procurement-inner .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 .procurement-inner h2 {
@@ -934,7 +935,7 @@ button:disabled {
   margin-bottom: 9px;
 }
 .procurement-inner p:last-child {
-  font-size: 12px;
+  font-size: 17px;
   margin-bottom: 0;
   max-width: 610px;
 }
@@ -961,7 +962,7 @@ button:disabled {
   margin-bottom: 23px;
 }
 .cta-inner > div > p:last-child {
-  font-size: 13px;
+  font-size: 17px;
   margin-bottom: 0;
 }
 .cta-orbit {
@@ -985,7 +986,7 @@ button:disabled {
   height: 35px;
 }
 .cta-orbit > span {
-  font-size: 11px;
+  font-size: 14px;
 }
 .cta-orbit:hover {
   transform: rotate(-8deg);
@@ -1006,13 +1007,13 @@ button:disabled {
   margin-bottom: 10px;
 }
 .footer-brand > p {
-  font-size: 12px;
+  font-size: 17px;
   line-height: 1.8;
   margin-bottom: 20px;
 }
 .footer-grid h2 {
   font-family: var(--body);
-  font-size: 10px;
+  font-size: 14px;
   letter-spacing: 0.7px;
   text-transform: uppercase;
   font-weight: 650;
@@ -1022,7 +1023,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.5;
   margin-bottom: 14px;
   color: #617083;
@@ -1035,7 +1036,7 @@ button:disabled {
   font-weight: 550;
 }
 .footer-address {
-  font-size: 11px;
+  font-size: 14px;
   margin-top: 22px;
   line-height: 1.7;
 }
@@ -1049,7 +1050,7 @@ button:disabled {
 }
 .footer-bottom p,
 .footer-bottom a {
-  font-size: 9px;
+  font-size: 14px;
   margin: 0;
   color: #788594;
 }
@@ -1073,13 +1074,13 @@ button:disabled {
   gap: 60px;
 }
 .page-hero-bottom > p {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.85;
   max-width: 600px;
   margin-bottom: 0;
 }
 .page-index {
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 0.4px;
   white-space: nowrap;
   color: #7a8797;
@@ -1112,11 +1113,11 @@ button:disabled {
   transform: rotate(-6deg);
 }
 .service-row-symbol > span {
-  font-size: 10px;
+  font-size: 14px;
   color: #617b93;
 }
 .service-row-main .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   margin-bottom: 14px;
 }
 .service-row-main h2 {
@@ -1124,12 +1125,12 @@ button:disabled {
   margin-bottom: 18px;
 }
 .service-row-main > p:not(.eyebrow) {
-  font-size: 13px;
+  font-size: 17px;
   line-height: 1.8;
   max-width: 380px;
 }
 .service-row-main .text-link {
-  font-size: 11px;
+  font-size: 16px;
 }
 .service-row > ul {
   list-style: none;
@@ -1145,7 +1146,7 @@ button:disabled {
   align-items: center;
   gap: 10px;
   color: #536d83;
-  font-size: 11px;
+  font-size: 16px;
   line-height: 1.6;
 }
 .service-row > ul svg {
@@ -1169,7 +1170,7 @@ button:disabled {
   object-fit: cover;
 }
 .tender-block > div > p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 17px;
 }
 .tender-block .button {
   margin-top: 14px;
@@ -1182,7 +1183,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 13px;
-  font-size: 10px;
+  font-size: 14px;
   color: #758396;
   margin-bottom: 60px;
   flex-wrap: wrap;
@@ -1201,7 +1202,7 @@ button:disabled {
   max-width: 720px;
 }
 .detail-hero-grid > div > p:not(.eyebrow) {
-  font-size: 15px;
+  font-size: 17px;
   max-width: 535px;
   margin-bottom: 30px;
 }
@@ -1240,7 +1241,7 @@ button:disabled {
 .service-sculpture > span {
   position: absolute;
   bottom: 8px;
-  font-size: 10px;
+  font-size: 14px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: #7b8ba0;
@@ -1264,7 +1265,7 @@ button:disabled {
   margin-bottom: 30px;
 }
 .fit-note {
-  font-size: 13px;
+  font-size: 17px;
   border-left: 2px solid var(--orange);
   padding-left: 20px;
   margin: 30px 0 0;
@@ -1323,7 +1324,7 @@ button:disabled {
 .deliverables li {
   display: flex;
   gap: 14px;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.6;
   color: #5f7488;
 }
@@ -1332,7 +1333,7 @@ button:disabled {
   margin-top: 2px;
 }
 .deliverables > p:last-child {
-  font-size: 11px;
+  font-size: 17px;
   line-height: 1.8;
   border-top: 1px solid var(--line);
   padding-top: 22px;
@@ -1360,7 +1361,7 @@ button:disabled {
   align-items: center;
   cursor: pointer;
   list-style: none;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
   font-weight: 550;
 }
@@ -1371,7 +1372,7 @@ button:disabled {
   transform: rotate(180deg);
 }
 .faq-section details p {
-  font-size: 13px;
+  font-size: 17px;
   padding-right: 35px;
   margin: 20px 0 0;
 }
@@ -1400,7 +1401,7 @@ button:disabled {
   background: #f1f7fe;
 }
 .related-services a > span {
-  font-size: 13px;
+  font-size: 16px;
 }
 .related-services a > svg:last-child {
   margin-left: auto;
@@ -1422,7 +1423,7 @@ button:disabled {
   position: absolute;
   bottom: 20px;
   right: 24px;
-  font-size: 9px;
+  font-size: 14px;
   color: white;
   text-shadow: 0 1px 6px #092c50;
 }
@@ -1432,7 +1433,7 @@ button:disabled {
   gap: 100px;
 }
 .about-story > div > p:not(.large-copy) {
-  font-size: 14px;
+  font-size: 17px;
 }
 .about-story .text-link {
   margin-top: 10px;
@@ -1459,7 +1460,7 @@ button:disabled {
   max-width: 300px;
 }
 .principle-grid p {
-  font-size: 13px;
+  font-size: 17px;
   max-width: 330px;
   margin-bottom: 0;
 }
@@ -1469,7 +1470,7 @@ button:disabled {
   gap: 100px;
 }
 .sectors-section > div > p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 17px;
   max-width: 370px;
 }
 .sector-list article {
@@ -1488,7 +1489,7 @@ button:disabled {
   margin-bottom: 10px;
 }
 .sector-list p {
-  font-size: 13px;
+  font-size: 17px;
   margin-bottom: 0;
 }
 /* Contact deliberately offers working direct channels alongside a private form endpoint. */
@@ -1496,7 +1497,7 @@ button:disabled {
   padding-bottom: 55px;
 }
 .contact-hero > p:last-child {
-  font-size: 16px;
+  font-size: 17px;
   margin-bottom: 0;
 }
 .contact-layout {
@@ -1533,7 +1534,7 @@ button:disabled {
   gap: 6px;
 }
 .contact-method small {
-  font-size: 10px;
+  font-size: 14px;
   color: #7b8a99;
 }
 .contact-method strong {
@@ -1563,15 +1564,15 @@ button:disabled {
   margin-bottom: 16px;
 }
 .contact-office > .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   margin-bottom: 18px;
 }
 .contact-office p:not(.eyebrow) {
-  font-size: 13px;
+  font-size: 17px;
   margin-bottom: 12px;
 }
 .contact-office .text-link {
-  font-size: 11px;
+  font-size: 16px;
 }
 .map-art {
   height: 140px;
@@ -1613,14 +1614,14 @@ button:disabled {
   position: absolute;
   bottom: 12px;
   left: 13px;
-  font-size: 8px;
+  font-size: 14px;
   background: white;
   padding: 5px 8px;
   border-radius: 5px;
   color: #5e7890;
 }
 .contact-tip {
-  font-size: 11px;
+  font-size: 17px;
   line-height: 1.8;
   margin-top: 22px;
   padding-inline: 3px;
@@ -1638,11 +1639,11 @@ button:disabled {
   margin-bottom: 14px;
 }
 .form-heading > .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   margin-bottom: 15px;
 }
 .form-heading > p:last-child {
-  font-size: 12px;
+  font-size: 17px;
   margin-bottom: 32px;
 }
 .form-grid {
@@ -1651,7 +1652,7 @@ button:disabled {
   gap: 24px 18px;
 }
 .form-grid label {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 550;
   color: #405b73;
   position: relative;
@@ -1670,7 +1671,7 @@ button:disabled {
   margin-top: 9px;
   background: white;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
   min-height: 47px;
@@ -1698,7 +1699,7 @@ button:disabled {
   align-items: start;
   gap: 10px;
   margin-block: 24px;
-  font-size: 10px;
+  font-size: 17px;
   line-height: 1.8;
   color: #738293;
 }
@@ -1720,12 +1721,12 @@ button:disabled {
   align-items: center;
 }
 .form-submit > span {
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.8;
   color: #7c8c9c;
 }
 .form-submit > span a {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--ink);
 }
 .form-error {
@@ -1737,7 +1738,7 @@ button:disabled {
 }
 .form-error p,
 .form-error a {
-  font-size: 11px;
+  font-size: 17px;
   line-height: 1.7;
   margin-bottom: 0;
   color: #9c3e1e;
@@ -1766,11 +1767,11 @@ button:disabled {
   font-size: 43px;
 }
 .form-success p {
-  font-size: 14px;
+  font-size: 17px;
 }
 .form-success .reference {
   font-family: monospace;
-  font-size: 11px;
+  font-size: 14px;
   margin-block: 25px 35px;
 }
 .loading-spin {
@@ -1794,7 +1795,7 @@ button:disabled {
   margin-bottom: 18px;
 }
 .policy-page p {
-  font-size: 14px;
+  font-size: 17px;
 }
 .policy-page .large-copy {
   font-size: 20px;
@@ -1842,11 +1843,11 @@ button:disabled {
     gap: 13px;
   }
   .hero-copy .text-link {
-    font-size: 11px;
+    font-size: 16px;
   }
   .hero-copy .button {
     gap: 15px;
-    font-size: 12px;
+    font-size: 16px;
   }
   .technology-scene {
     height: 540px;
@@ -1894,7 +1895,7 @@ button:disabled {
     gap: 15px;
   }
   .form-submit > .button {
-    font-size: 11px;
+    font-size: 16px;
     padding-inline: 17px;
     gap: 15px;
   }
@@ -1909,7 +1910,7 @@ button:disabled {
     font-size: 25px;
   }
   .procurement-inner > .button {
-    font-size: 11px;
+    font-size: 16px;
     padding-inline: 17px;
     gap: 15px;
   }
@@ -1941,15 +1942,15 @@ button:disabled {
     height: 460px;
   }
   .hero-description {
-    font-size: 14px;
+    font-size: 17px;
     max-width: 320px;
   }
   .hero-copy .eyebrow {
-    font-size: 8px;
-    letter-spacing: 1px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
   }
   .hero-footnote {
-    font-size: 8px;
+    font-size: 14px;
   }
   .hero-copy .button-row {
     align-items: start;
@@ -1957,12 +1958,12 @@ button:disabled {
     gap: 12px;
   }
   .scene-label-bottom {
-    font-size: 8px;
+    font-size: 14px;
     left: 5%;
     bottom: 8%;
   }
   .scene-label-top {
-    font-size: 8px;
+    font-size: 14px;
     top: 12%;
     right: 0;
     padding: 8px 10px;
@@ -1984,7 +1985,7 @@ button:disabled {
     display: none;
   }
   .audience-inner > span {
-    font-size: 11px;
+    font-size: 16px;
   }
   .section {
     padding-block: 85px;
@@ -1996,7 +1997,7 @@ button:disabled {
     font-size: 43px;
   }
   .section-intro > p {
-    font-size: 12px;
+    font-size: 17px;
   }
   .capability-grid {
     gap: 15px;
@@ -2029,7 +2030,7 @@ button:disabled {
     font-size: 23px;
   }
   .compact-card .card-copy p {
-    font-size: 11px;
+    font-size: 17px;
   }
   .compact-card .card-copy {
     padding-inline: 22px;
@@ -2096,12 +2097,12 @@ button:disabled {
     display: block;
   }
   .page-hero-bottom > p {
-    font-size: 14px;
+    font-size: 17px;
   }
   .page-index {
     display: block;
     margin-top: 25px;
-    font-size: 8px;
+    font-size: 14px;
   }
   .service-row {
     grid-template-columns: 120px 1fr;
@@ -2130,7 +2131,7 @@ button:disabled {
     font-size: 37px;
   }
   .tender-block > div > p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .detail-hero-grid {
     gap: 20px;
@@ -2182,7 +2183,7 @@ button:disabled {
     font-size: 35px;
   }
   .faq-section summary {
-    font-size: 13px;
+    font-size: 16px;
   }
   .about-panorama {
     height: 440px;
@@ -2197,7 +2198,7 @@ button:disabled {
     font-size: 24px;
   }
   .principle-grid p {
-    font-size: 12px;
+    font-size: 17px;
   }
   .sectors-section {
     gap: 50px;
@@ -2276,12 +2277,12 @@ button:disabled {
     margin-bottom: 26px;
   }
   .hero-copy .eyebrow {
-    font-size: 8px;
-    letter-spacing: 1.1px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
     margin-bottom: 27px;
   }
   .hero-description {
-    font-size: 15px;
+    font-size: 17px;
     max-width: 330px;
     line-height: 1.75;
     margin-bottom: 25px;
@@ -2292,18 +2293,18 @@ button:disabled {
     gap: 20px;
   }
   .hero-copy .button {
-    font-size: 11px;
+    font-size: 16px;
     min-height: 49px;
     padding: 13px 17px;
     gap: 12px;
   }
   .hero-copy .text-link {
-    font-size: 10px;
+    font-size: 16px;
     gap: 8px;
     max-width: 140px;
   }
   .hero-footnote {
-    font-size: 8px;
+    font-size: 14px;
     margin-top: 26px;
     gap: 8px;
   }
@@ -2314,12 +2315,12 @@ button:disabled {
   .scene-label-top {
     top: 7%;
     right: 7%;
-    font-size: 8px;
+    font-size: 14px;
   }
   .scene-label-bottom {
     bottom: 10%;
     left: 9%;
-    font-size: 8px;
+    font-size: 14px;
   }
   .scene-control {
     bottom: 7%;
@@ -2327,7 +2328,7 @@ button:disabled {
   }
   .hero-bottom {
     height: 55px;
-    font-size: 8px;
+    font-size: 14px;
   }
   .hero-bottom a {
     gap: 8px;
@@ -2337,11 +2338,11 @@ button:disabled {
     padding-block: 26px;
   }
   .audience-inner > p {
-    font-size: 10px;
+    font-size: 17px;
     margin-bottom: 3px;
   }
   .audience-inner > span {
-    font-size: 9px;
+    font-size: 16px;
     gap: 7px;
   }
   .audience-inner svg {
@@ -2360,8 +2361,8 @@ button:disabled {
     line-height: 1.12;
   }
   .eyebrow {
-    font-size: 9px;
-    letter-spacing: 1.4px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
     margin-bottom: 20px;
   }
   .section-intro {
@@ -2369,7 +2370,7 @@ button:disabled {
     margin-top: 25px;
   }
   .section-intro > p {
-    font-size: 13px;
+    font-size: 17px;
   }
   .capability-grid {
     grid-template-columns: 1fr;
@@ -2394,7 +2395,7 @@ button:disabled {
     font-size: 34px;
   }
   .card-copy > p:last-child {
-    font-size: 13px;
+    font-size: 17px;
   }
   .software-window {
     margin: 0 37px 10px 60px;
@@ -2419,7 +2420,7 @@ button:disabled {
     max-width: 300px;
   }
   .compact-card .card-copy p {
-    font-size: 12px;
+    font-size: 17px;
     max-width: 380px;
   }
   .image-story {
@@ -2432,14 +2433,14 @@ button:disabled {
     font-size: 60px;
   }
   .image-story p:not(.eyebrow) {
-    font-size: 14px;
+    font-size: 17px;
     max-width: 280px;
   }
   .image-shade {
     background: linear-gradient(90deg, #071f3cdb, #092c5060);
   }
   .image-caption {
-    font-size: 8px;
+    font-size: 14px;
     right: 20px;
     bottom: 18px;
   }
@@ -2454,7 +2455,7 @@ button:disabled {
     font-size: 40px;
   }
   .process-intro > p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .process-steps {
     padding-left: 54px;
@@ -2463,7 +2464,7 @@ button:disabled {
     left: -54px;
     width: 32px;
     height: 32px;
-    font-size: 8px;
+    font-size: 14px;
   }
   .process-track {
     left: 15px;
@@ -2475,7 +2476,7 @@ button:disabled {
     font-size: 26px;
   }
   .process-step > p:last-child {
-    font-size: 12px;
+    font-size: 17px;
   }
   .procurement-section {
     padding-block: 37px;
@@ -2501,10 +2502,10 @@ button:disabled {
     line-height: 1.2;
   }
   .procurement-inner .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
   }
   .procurement-inner p:last-child {
-    font-size: 11px;
+    font-size: 17px;
     line-height: 1.8;
   }
   .procurement-inner > .button {
@@ -2522,7 +2523,7 @@ button:disabled {
     letter-spacing: -1.6px;
   }
   .cta-inner > div > p:last-child {
-    font-size: 12px;
+    font-size: 17px;
     max-width: 360px;
   }
   .desktop-break {
@@ -2541,7 +2542,7 @@ button:disabled {
     width: 23px;
   }
   .cta-orbit > span {
-    font-size: 10px;
+    font-size: 14px;
   }
   .site-footer {
     padding-top: 55px;
@@ -2558,7 +2559,7 @@ button:disabled {
     margin-bottom: 7px;
   }
   .footer-brand > p {
-    font-size: 12px;
+    font-size: 17px;
     margin-bottom: 17px;
   }
   .footer-grid > div:nth-child(2),
@@ -2569,11 +2570,11 @@ button:disabled {
     grid-column: 1/-1;
   }
   .footer-grid h2 {
-    font-size: 9px;
+    font-size: 14px;
     margin-bottom: 20px;
   }
   .footer-grid > div > a:not(.brand-logo) {
-    font-size: 10px;
+    font-size: 14px;
     line-height: 1.6;
     margin-bottom: 12px;
   }
@@ -2582,7 +2583,7 @@ button:disabled {
     margin-right: 20px;
   }
   .footer-address {
-    font-size: 11px;
+    font-size: 14px;
     margin-top: 12px;
   }
   .footer-bottom {
@@ -2592,7 +2593,7 @@ button:disabled {
   }
   .footer-bottom p,
   .footer-bottom a {
-    font-size: 8px;
+    font-size: 14px;
   }
   .footer-bottom > p:nth-child(2) {
     display: none;
@@ -2609,11 +2610,11 @@ button:disabled {
     margin-bottom: 22px;
   }
   .page-hero-bottom > p {
-    font-size: 13px;
+    font-size: 17px;
     line-height: 1.8;
   }
   .page-index {
-    font-size: 8px;
+    font-size: 14px;
     white-space: normal;
   }
   .service-directory {
@@ -2637,19 +2638,19 @@ button:disabled {
     width: 32px;
   }
   .service-row-symbol > span {
-    font-size: 8px;
+    font-size: 14px;
   }
   .service-row-main h2 {
     font-size: 32px;
   }
   .service-row-main .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
   }
   .service-row-main > p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .service-row-main .text-link {
-    font-size: 11px;
+    font-size: 16px;
   }
   .service-row > ul {
     margin: 25px 0 0;
@@ -2659,7 +2660,7 @@ button:disabled {
     gap: 13px;
   }
   .service-row > ul > li {
-    font-size: 11px;
+    font-size: 16px;
   }
   .tender-block {
     display: block;
@@ -2673,13 +2674,13 @@ button:disabled {
     font-size: 36px;
   }
   .tender-block > div > p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .detail-hero {
     padding-block: 25px 45px;
   }
   .breadcrumb {
-    font-size: 8px;
+    font-size: 14px;
     gap: 10px;
     margin-bottom: 40px;
   }
@@ -2694,20 +2695,20 @@ button:disabled {
     line-height: 1.08;
   }
   .detail-hero-grid > div > p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .detail-hero .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
   }
   .detail-hero .button {
-    font-size: 12px;
+    font-size: 16px;
   }
   .service-sculpture {
     min-height: 260px;
     margin-top: 10px;
   }
   .service-sculpture > span {
-    font-size: 9px;
+    font-size: 14px;
     bottom: 0;
   }
   .detail-intro {
@@ -2725,7 +2726,7 @@ button:disabled {
     font-size: 17px;
   }
   .fit-note {
-    font-size: 12px;
+    font-size: 17px;
     line-height: 1.8;
   }
   .scope-section {
@@ -2745,7 +2746,7 @@ button:disabled {
     padding-block: 21px;
   }
   .scope-list h3 {
-    font-size: 13px;
+    font-size: 14px;
   }
   .deliverables {
     padding: 30px;
@@ -2754,7 +2755,7 @@ button:disabled {
     font-size: 30px;
   }
   .deliverables li {
-    font-size: 12px;
+    font-size: 16px;
   }
   .faq-section {
     display: block;
@@ -2764,10 +2765,10 @@ button:disabled {
     margin-bottom: 35px;
   }
   .faq-section summary {
-    font-size: 13px;
+    font-size: 16px;
   }
   .faq-section details p {
-    font-size: 12px;
+    font-size: 17px;
     padding-right: 5px;
   }
   .related-services {
@@ -2784,7 +2785,7 @@ button:disabled {
     padding: 22px;
   }
   .related-services a > span {
-    font-size: 12px;
+    font-size: 16px;
   }
   .about-panorama {
     height: 330px;
@@ -2794,7 +2795,7 @@ button:disabled {
     object-position: 63% center;
   }
   .about-panorama > span {
-    font-size: 8px;
+    font-size: 14px;
     right: 15px;
     bottom: 15px;
   }
@@ -2809,7 +2810,7 @@ button:disabled {
     font-size: 18px;
   }
   .about-story > div > p:not(.large-copy) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .principles-section {
     padding-block: 70px;
@@ -2831,7 +2832,7 @@ button:disabled {
     max-width: 320px;
   }
   .principle-grid p {
-    font-size: 13px;
+    font-size: 17px;
     max-width: none;
   }
   .sectors-section {
@@ -2841,7 +2842,7 @@ button:disabled {
     font-size: 40px;
   }
   .sectors-section > div > p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
     margin-bottom: 35px;
   }
   .sector-list article {
@@ -2852,13 +2853,13 @@ button:disabled {
     font-size: 25px;
   }
   .sector-list p {
-    font-size: 12px;
+    font-size: 17px;
   }
   .contact-hero {
     padding-bottom: 38px;
   }
   .contact-hero > p:last-child {
-    font-size: 13px;
+    font-size: 17px;
   }
   .contact-layout {
     display: flex;
@@ -2889,13 +2890,13 @@ button:disabled {
     font-size: 31px;
   }
   .contact-office p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .map-art {
     height: 170px;
   }
   .contact-tip {
-    font-size: 11px;
+    font-size: 17px;
   }
   .enquiry-form {
     width: 100%;
@@ -2907,14 +2908,14 @@ button:disabled {
     font-size: 32px;
   }
   .form-heading > p:last-child {
-    font-size: 12px;
+    font-size: 17px;
     margin-bottom: 27px;
   }
   .form-grid {
     grid-template-columns: 1fr;
   }
   .form-grid label {
-    font-size: 11px;
+    font-size: 14px;
   }
   .form-grid input,
   .form-grid select,
@@ -2924,7 +2925,7 @@ button:disabled {
     min-height: 48px;
   }
   .consent {
-    font-size: 10px;
+    font-size: 17px;
     line-height: 1.8;
     gap: 10px;
   }
@@ -2932,15 +2933,15 @@ button:disabled {
     gap: 20px;
   }
   .form-submit > .button {
-    font-size: 12px;
+    font-size: 16px;
     gap: 20px;
     padding-inline: 20px;
   }
   .form-submit > span {
-    font-size: 8px;
+    font-size: 14px;
   }
   .form-submit > span > a {
-    font-size: 10px;
+    font-size: 14px;
   }
   .form-success {
     min-height: 480px;
@@ -2950,7 +2951,7 @@ button:disabled {
     font-size: 38px;
   }
   .form-success p {
-    font-size: 13px;
+    font-size: 17px;
   }
   .policy-page {
     padding-block: 55px 70px;
@@ -2965,7 +2966,7 @@ button:disabled {
     font-size: 28px;
   }
   .policy-page p {
-    font-size: 13px;
+    font-size: 17px;
   }
 }
 @media (max-width: 360px) {
@@ -2979,15 +2980,15 @@ button:disabled {
     gap: 14px;
   }
   .hero-copy .text-link {
-    font-size: 9px;
+    font-size: 16px;
     max-width: 115px;
   }
   .hero-copy .button {
-    font-size: 10px;
+    font-size: 16px;
     padding-inline: 14px;
   }
   .audience-inner > span {
-    font-size: 8px;
+    font-size: 16px;
     gap: 5px;
   }
   .audience-inner {
@@ -3033,13 +3034,13 @@ button:disabled {
   grid-template-columns: 1fr 1.08fr;
 }
 .hero-copy .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   max-width: 470px;
-  letter-spacing: 1.1px;
+  letter-spacing: 0.04em;
 }
 .hero-description {
   max-width: 455px;
-  font-size: 16px;
+  font-size: 17px;
 }
 .hero-equipment-stage {
   position: relative;
@@ -3075,7 +3076,7 @@ button:disabled {
   backdrop-filter: blur(15px);
   border-radius: 30px;
   box-shadow: 0 3px 15px #092c500a;
-  font-size: 9px;
+  font-size: 14px;
 }
 .equipment-stage-link {
   position: absolute;
@@ -3088,7 +3089,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 22px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   padding: 19px 22px;
 }
@@ -3100,7 +3101,7 @@ button:disabled {
   bottom: 14px;
   right: 10px;
   color: #7e8b9b;
-  font-size: 8px;
+  font-size: 14px;
 }
 .anchor-target {
   display: block;
@@ -3157,7 +3158,7 @@ button:disabled {
   position: absolute;
   bottom: 15px;
   left: 20px;
-  font-size: 8px;
+  font-size: 14px;
   color: white;
   background: #092c5080;
   padding: 5px 8px;
@@ -3167,17 +3168,17 @@ button:disabled {
   font-size: 54px;
 }
 .laptop-feature p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 17px;
 }
 .laptop-feature .button-row {
   gap: 15px;
 }
 .laptop-feature .button {
-  font-size: 11px;
+  font-size: 16px;
   gap: 18px;
 }
 .laptop-feature .text-link {
-  font-size: 11px;
+  font-size: 16px;
 }
 .feature-checks {
   list-style: none;
@@ -3190,7 +3191,7 @@ button:disabled {
   display: flex;
   align-items: start;
   gap: 11px;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.7;
   color: #577086;
 }
@@ -3222,7 +3223,7 @@ button:disabled {
   grid-column: 1/-1;
   color: #7eb3d9;
   margin-bottom: 12px;
-  font-size: 9px;
+  font-size: 14px;
 }
 .infrastructure-heading h2 {
   font-size: clamp(34px, 3.1vw, 46px);
@@ -3234,7 +3235,7 @@ button:disabled {
   color: #83a9c9;
 }
 .infrastructure-heading > p:last-child {
-  font-size: 11px;
+  font-size: 17px;
   color: #9eb5ca;
   max-width: 240px;
   margin: 0 0 4px;
@@ -3291,7 +3292,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 9px;
+  font-size: 14px;
   color: #91adc3;
 }
 .infrastructure-chapters {
@@ -3302,10 +3303,10 @@ button:disabled {
   border-top: 1px solid #47678160;
 }
 .infrastructure-chapter > .eyebrow {
-  font-size: 10px;
+  font-size: 14px;
   color: #ffb75d;
   margin-bottom: 19px;
-  letter-spacing: 1.7px;
+  letter-spacing: 0.04em;
   gap: 12px;
 }
 .infrastructure-chapter h3 {
@@ -3316,14 +3317,14 @@ button:disabled {
   max-width: 380px;
 }
 .infrastructure-chapter > p:not(.eyebrow) {
-  font-size: 13px;
+  font-size: 17px;
   line-height: 1.85;
   color: #9cb6cc;
   max-width: 360px;
   margin-bottom: 22px;
 }
 .infrastructure-chapter .text-link {
-  font-size: 11px;
+  font-size: 16px;
   color: #d7e8f7;
 }
 .infrastructure-chapter .text-link:hover {
@@ -3342,12 +3343,12 @@ button:disabled {
   display: flex;
   gap: 15px;
   align-items: center;
-  font-size: 9px;
+  font-size: 14px;
   color: #728fa6;
   padding: 22px 0 0;
 }
 .chapter-marker > strong {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 450;
   color: #a0bbd0;
 }
@@ -3433,7 +3434,7 @@ button:disabled {
   position: absolute;
   bottom: 15px;
   left: 20px;
-  font-size: 8px;
+  font-size: 14px;
   color: white;
   background: #092c5080;
   padding: 5px 8px;
@@ -3449,7 +3450,7 @@ button:disabled {
   font-size: 42px;
 }
 .service-planning p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 17px;
   max-width: 550px;
 }
 .service-planning ul {
@@ -3464,7 +3465,7 @@ button:disabled {
   display: flex;
   align-items: start;
   gap: 15px;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.7;
   color: #5f7487;
 }
@@ -3483,7 +3484,7 @@ button:disabled {
   max-width: 450px;
 }
 .service-depth article > p {
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1.9;
 }
 .service-category-link {
@@ -3501,12 +3502,12 @@ button:disabled {
   margin-bottom: 12px;
 }
 .service-category-link p:not(.eyebrow) {
-  font-size: 12px;
+  font-size: 17px;
   max-width: 620px;
   margin-bottom: 0;
 }
 .service-category-link .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   margin-bottom: 13px;
 }
 /* Useful buying content, with quote-led equipment rather than invented stock. */
@@ -3527,10 +3528,10 @@ button:disabled {
   line-height: 1.06;
 }
 .laptop-page-grid p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 17px;
 }
 .laptop-page-grid .quote-note {
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.8;
   max-width: 390px;
   margin: 20px 0 0;
@@ -3545,7 +3546,7 @@ button:disabled {
   object-fit: cover;
 }
 .laptop-page-grid figcaption {
-  font-size: 8px;
+  font-size: 14px;
   line-height: 1.7;
   color: #8794a2;
   margin-top: 12px;
@@ -3565,7 +3566,7 @@ button:disabled {
   color: #6e8295;
   text-align: left;
   padding: 25px;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.5;
   transition:
     background 0.2s,
@@ -3593,12 +3594,12 @@ button:disabled {
   font-size: 34px;
 }
 .workload-panel p:not(.eyebrow) {
-  font-size: 13px;
+  font-size: 17px;
   margin-bottom: 0;
 }
 .workload-panel .eyebrow {
-  font-size: 8px;
-  letter-spacing: 1px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
 }
 .workload-panel ul {
   list-style: none;
@@ -3612,7 +3613,7 @@ button:disabled {
   display: flex;
   align-items: start;
   gap: 13px;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.8;
   color: #587084;
 }
@@ -3642,7 +3643,7 @@ button:disabled {
   line-height: 1.15;
 }
 .purchase-grid p {
-  font-size: 12px;
+  font-size: 17px;
   line-height: 1.85;
   margin-bottom: 0;
 }
@@ -3656,7 +3657,7 @@ button:disabled {
   font-size: 43px;
 }
 .quote-checklist p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 17px;
   max-width: 480px;
 }
 .quote-checklist ul {
@@ -3669,7 +3670,7 @@ button:disabled {
 .quote-checklist li {
   display: flex;
   gap: 16px;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.8;
   color: #526d83;
 }
@@ -3711,7 +3712,7 @@ button:disabled {
 }
 .guide-image > figcaption {
   margin-top: 10px;
-  font-size: 9px;
+  font-size: 14px;
   color: #8997a5;
 }
 .guide-body {
@@ -3729,7 +3730,7 @@ button:disabled {
   display: flex;
   align-items: start;
   gap: 15px;
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.8;
   color: #6d8294;
   margin-bottom: 20px;
@@ -3738,7 +3739,7 @@ button:disabled {
   color: var(--blue);
 }
 .guide-contents > a > span {
-  font-size: 9px;
+  font-size: 14px;
   color: #9babb8;
   padding-top: 2px;
 }
@@ -3752,14 +3753,14 @@ button:disabled {
   scroll-margin-top: 135px;
 }
 .guide-article > section > .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   color: #8c9cad;
 }
 .guide-article h2 {
   font-size: 36px;
 }
 .guide-article p {
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1.95;
 }
 .guide-action {
@@ -3771,7 +3772,7 @@ button:disabled {
   font-size: 30px;
 }
 .guide-action p {
-  font-size: 13px;
+  font-size: 17px;
   margin-bottom: 25px;
 }
 @media (max-width: 1150px) {
@@ -3785,20 +3786,20 @@ button:disabled {
     gap: 15px;
   }
   .hero-description {
-    font-size: 14px;
+    font-size: 17px;
   }
   .hero-equipment-frame {
     aspect-ratio: 1;
   }
   .equipment-stage-caption {
-    font-size: 8px;
+    font-size: 14px;
     left: 15px;
     top: 54px;
   }
   .equipment-stage-link {
     right: 0;
     bottom: 60px;
-    font-size: 10px;
+    font-size: 14px;
     padding: 15px;
     gap: 15px;
   }
@@ -3819,7 +3820,7 @@ button:disabled {
     font-size: 34px;
   }
   .infrastructure-chapter > p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .service-planning {
     gap: 55px;
@@ -3845,7 +3846,7 @@ button:disabled {
   .workload-tabs > button {
     padding: 20px 15px;
     gap: 10px;
-    font-size: 11px;
+    font-size: 16px;
   }
   .workload-panel {
     gap: 40px;
@@ -3876,22 +3877,22 @@ button:disabled {
     aspect-ratio: 0.85;
   }
   .equipment-stage-caption {
-    font-size: 7px;
+    font-size: 14px;
     letter-spacing: -0.1px;
     padding: 8px 10px;
     left: 10px;
   }
   .equipment-stage-link {
-    font-size: 9px;
+    font-size: 14px;
     padding: 13px;
     bottom: 55px;
   }
   .hero-copy .eyebrow {
-    font-size: 7px;
-    letter-spacing: 0.7px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
   }
   .hero-description {
-    font-size: 13px;
+    font-size: 17px;
   }
   .infrastructure-story {
     padding-block: 60px 40px;
@@ -3905,7 +3906,7 @@ button:disabled {
   .infrastructure-heading > p:last-child {
     margin-top: 20px;
     max-width: none;
-    font-size: 12px;
+    font-size: 17px;
   }
   .infrastructure-grid {
     display: block;
@@ -3931,17 +3932,17 @@ button:disabled {
     font-size: 29px;
   }
   .infrastructure-chapter > p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .infrastructure-chapter .text-link {
-    font-size: 10px;
+    font-size: 16px;
   }
   .infrastructure-nav {
     display: none;
   }
   .infrastructure-caption {
     bottom: 10px;
-    font-size: 8px;
+    font-size: 14px;
   }
   .laptop-feature {
     gap: 35px;
@@ -3950,7 +3951,7 @@ button:disabled {
     font-size: 38px;
   }
   .laptop-feature p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .laptop-feature .button-row {
     align-items: start;
@@ -3972,10 +3973,10 @@ button:disabled {
   }
   .service-planning p:not(.eyebrow),
   .service-depth article > p {
-    font-size: 12px;
+    font-size: 17px;
   }
   .service-planning li {
-    font-size: 12px;
+    font-size: 16px;
   }
   .service-depth {
     gap: 35px;
@@ -3991,7 +3992,7 @@ button:disabled {
     font-size: 24px;
   }
   .service-category-link .button {
-    font-size: 10px;
+    font-size: 16px;
     padding-inline: 16px;
     gap: 12px;
   }
@@ -4002,14 +4003,14 @@ button:disabled {
     font-size: 54px;
   }
   .laptop-page-grid p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .laptop-page-grid .button {
-    font-size: 11px;
+    font-size: 16px;
     gap: 15px;
   }
   .laptop-page-grid .quote-note {
-    font-size: 9px;
+    font-size: 14px;
   }
   .laptop-page-grid figure > img {
     aspect-ratio: 0.85;
@@ -4018,7 +4019,7 @@ button:disabled {
     grid-template-columns: 1fr 1fr;
   }
   .workload-tabs > button {
-    font-size: 12px;
+    font-size: 16px;
     padding: 20px;
   }
   .workload-panel {
@@ -4029,10 +4030,10 @@ button:disabled {
     font-size: 29px;
   }
   .workload-panel p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .workload-panel li {
-    font-size: 11px;
+    font-size: 16px;
   }
   .purchase-grid {
     grid-template-columns: 1fr 1fr;
@@ -4049,7 +4050,7 @@ button:disabled {
   }
   .quote-checklist p:not(.eyebrow),
   .quote-checklist li {
-    font-size: 12px;
+    font-size: 17px;
   }
   .guide-image > img {
     height: 380px;
@@ -4065,13 +4066,13 @@ button:disabled {
     font-size: 17px;
   }
   .guide-contents > a {
-    font-size: 10px;
+    font-size: 14px;
   }
   .guide-article h2 {
     font-size: 31px;
   }
   .guide-article p {
-    font-size: 13px;
+    font-size: 17px;
   }
 }
 @media (max-width: 650px) {
@@ -4088,12 +4089,12 @@ button:disabled {
     padding-bottom: 10px;
   }
   .hero-copy .eyebrow {
-    font-size: 7px;
-    letter-spacing: 0.8px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
     margin-bottom: 25px;
   }
   .hero-description {
-    font-size: 14px;
+    font-size: 17px;
     line-height: 1.8;
     margin-bottom: 24px;
     max-width: none;
@@ -4111,11 +4112,11 @@ button:disabled {
   .equipment-stage-caption {
     top: 40px;
     left: 12px;
-    font-size: 7px;
+    font-size: 14px;
     padding: 8px 11px;
   }
   .equipment-stage-link {
-    font-size: 10px;
+    font-size: 14px;
     right: 10px;
     bottom: 50px;
     padding: 12px 14px;
@@ -4123,7 +4124,7 @@ button:disabled {
     border-radius: 8px;
   }
   .visual-disclosure {
-    font-size: 7px;
+    font-size: 14px;
     right: 0;
     bottom: 12px;
   }
@@ -4132,11 +4133,11 @@ button:disabled {
   }
   .hero-bottom {
     height: 52px;
-    font-size: 7px;
+    font-size: 14px;
     gap: 8px;
   }
   .hero-bottom a {
-    font-size: 8px;
+    font-size: 14px;
   }
   .capabilities .compact-card {
     min-height: 385px;
@@ -4148,7 +4149,7 @@ button:disabled {
     font-size: 28px;
   }
   .compact-card .card-copy p {
-    font-size: 12px;
+    font-size: 17px;
   }
   .laptop-feature {
     display: block;
@@ -4163,7 +4164,7 @@ button:disabled {
     font-size: 40px;
   }
   .laptop-feature p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .laptop-feature .button-row {
     flex-direction: row;
@@ -4171,23 +4172,23 @@ button:disabled {
     gap: 20px;
   }
   .laptop-feature .button {
-    font-size: 10px;
+    font-size: 16px;
     gap: 15px;
     padding-inline: 16px;
   }
   .laptop-feature .text-link {
-    font-size: 10px;
+    font-size: 16px;
     gap: 10px;
   }
   .feature-checks li {
-    font-size: 11px;
+    font-size: 16px;
   }
   .infrastructure-story {
     padding-block: 50px 35px;
     scroll-margin-top: 79px;
   }
   .infrastructure-heading > .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
   }
   .infrastructure-heading h2 {
     font-size: 35px;
@@ -4195,7 +4196,7 @@ button:disabled {
     line-height: 1.12;
   }
   .infrastructure-heading > p:last-child {
-    font-size: 11px;
+    font-size: 17px;
     margin-top: 19px;
   }
   .infrastructure-visual {
@@ -4212,7 +4213,7 @@ button:disabled {
   .infrastructure-caption {
     bottom: 2%;
     left: 8%;
-    font-size: 7px;
+    font-size: 14px;
   }
   .infrastructure-chapters {
     display: block;
@@ -4228,16 +4229,16 @@ button:disabled {
     margin-bottom: 17px;
   }
   .infrastructure-chapter > .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
     margin-bottom: 16px;
   }
   .infrastructure-chapter > p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
     max-width: none;
     margin-bottom: 16px;
   }
   .infrastructure-chapter .text-link {
-    font-size: 11px;
+    font-size: 16px;
   }
   .detail-hero-grid {
     display: flex;
@@ -4253,7 +4254,7 @@ button:disabled {
     border-radius: 16px;
   }
   .detail-photograph figcaption {
-    font-size: 7px;
+    font-size: 14px;
     left: 12px;
     bottom: 12px;
   }
@@ -4265,14 +4266,14 @@ button:disabled {
     font-size: 35px;
   }
   .service-planning p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .service-planning ul {
     margin-top: 30px;
     gap: 20px;
   }
   .service-planning li {
-    font-size: 12px;
+    font-size: 16px;
   }
   .service-depth {
     display: block;
@@ -4285,7 +4286,7 @@ button:disabled {
     font-size: 32px;
   }
   .service-depth article > p {
-    font-size: 13px;
+    font-size: 17px;
     line-height: 1.9;
   }
   .service-category-link {
@@ -4296,11 +4297,11 @@ button:disabled {
     font-size: 27px;
   }
   .service-category-link p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .service-category-link .button {
     margin-top: 25px;
-    font-size: 11px;
+    font-size: 16px;
   }
   .laptop-page-hero {
     padding-block: 25px 15px;
@@ -4316,13 +4317,13 @@ button:disabled {
     line-height: 1.05;
   }
   .laptop-page-grid > .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
   }
   .laptop-page-grid p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .laptop-page-grid .quote-note {
-    font-size: 9px;
+    font-size: 14px;
     max-width: none;
     margin-top: 18px;
   }
@@ -4334,7 +4335,7 @@ button:disabled {
     border-radius: 16px;
   }
   .laptop-page-grid figcaption {
-    font-size: 8px;
+    font-size: 14px;
   }
   .workload-tabs {
     gap: 10px;
@@ -4342,7 +4343,7 @@ button:disabled {
   .workload-tabs > button {
     padding: 19px 12px;
     gap: 10px;
-    font-size: 10px;
+    font-size: 16px;
     border-radius: 10px;
   }
   .workload-tabs > button > svg {
@@ -4355,21 +4356,21 @@ button:disabled {
     margin-top: 15px;
   }
   .workload-panel .eyebrow {
-    font-size: 7px;
-    letter-spacing: 0.9px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
   }
   .workload-panel h3 {
     font-size: 30px;
   }
   .workload-panel p:not(.eyebrow) {
-    font-size: 12px;
+    font-size: 17px;
   }
   .workload-panel ul {
     margin-top: 27px;
     gap: 18px;
   }
   .workload-panel li {
-    font-size: 11px;
+    font-size: 16px;
   }
   .purchase-scope {
     padding-block: 65px;
@@ -4382,7 +4383,7 @@ button:disabled {
     font-size: 28px;
   }
   .purchase-grid p {
-    font-size: 12px;
+    font-size: 17px;
   }
   .purchase-grid article > svg {
     margin-bottom: 23px;
@@ -4394,14 +4395,14 @@ button:disabled {
     font-size: 36px;
   }
   .quote-checklist p:not(.eyebrow) {
-    font-size: 13px;
+    font-size: 17px;
   }
   .quote-checklist ul {
     margin-top: 30px;
     gap: 20px;
   }
   .quote-checklist li {
-    font-size: 12px;
+    font-size: 16px;
   }
   .laptop-faq {
     padding-bottom: 65px;
@@ -4421,7 +4422,7 @@ button:disabled {
     line-height: 1.1;
   }
   .guide-header .large-copy {
-    font-size: 16px;
+    font-size: 17px;
   }
   .guide-image {
     margin-block: 30px 40px;
@@ -4431,7 +4432,7 @@ button:disabled {
     border-radius: 15px;
   }
   .guide-image > figcaption {
-    font-size: 8px;
+    font-size: 14px;
   }
   .guide-body {
     display: block;
@@ -4444,7 +4445,7 @@ button:disabled {
     margin-bottom: 45px;
   }
   .guide-contents > a {
-    font-size: 11px;
+    font-size: 14px;
     line-height: 1.7;
     margin-bottom: 14px;
   }
@@ -4452,17 +4453,17 @@ button:disabled {
     margin-bottom: 0;
   }
   .guide-contents > a > span {
-    font-size: 8px;
+    font-size: 14px;
   }
   .guide-contents > .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
     margin-bottom: 18px;
   }
   .guide-article h2 {
     font-size: 32px;
   }
   .guide-article p {
-    font-size: 13px;
+    font-size: 17px;
     line-height: 1.9;
   }
   .guide-article > section {
@@ -4470,7 +4471,7 @@ button:disabled {
     margin-bottom: 30px;
   }
   .guide-article > section > .eyebrow {
-    font-size: 8px;
+    font-size: 14px;
   }
   .guide-action {
     padding: 27px;
@@ -4479,10 +4480,10 @@ button:disabled {
     font-size: 28px;
   }
   .guide-action .button {
-    font-size: 11px;
+    font-size: 16px;
   }
   .guide-action p {
-    font-size: 12px;
+    font-size: 17px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -4511,5 +4512,25 @@ button:disabled {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@media (max-width: 650px) {
+  .procurement-inner > .button {
+    margin-left: 0;
+  }
+  .hero-bottom {
+    height: auto;
+    min-height: 62px;
+    padding-block: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .infrastructure-visual {
+    overflow: clip;
+  }
+}
+@media (max-width: 360px) {
+  .home-hero h1 {
+    font-size: 46px;
   }
 }
