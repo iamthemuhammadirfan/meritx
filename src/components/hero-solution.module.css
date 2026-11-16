@@ -2,7 +2,7 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  padding: 8px 0 48px;
+  padding: 12px 0 38px;
   isolation: isolate;
 }
 .visual {
@@ -10,36 +10,30 @@
   width: 100%;
   aspect-ratio: 1.14;
   min-height: 440px;
+  perspective: 1100px;
 }
-.kicker {
+.scrollScene,
+.pointerScene {
   position: absolute;
-  top: 3%;
-  left: 9%;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: #75899b;
-  font-size: 9px;
-  letter-spacing: 0.3px;
-}
-.kicker > span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #ff9a2e;
-  box-shadow: 0 0 0 4px #ff9a2e12;
+  inset: 0;
+  transform-style: preserve-3d;
 }
 .grid {
   position: absolute;
-  inset: 12% 4% 0;
+  inset: 8% 1% 3%;
+  background-image:
+    linear-gradient(#5e8cab12 1px, transparent 1px),
+    linear-gradient(90deg, #5e8cab12 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse, #000 35%, transparent 73%);
+  transform: translateZ(-30px);
+}
+.grid::after {
+  content: "";
+  position: absolute;
+  inset: 15%;
+  border: 1px solid #779db82b;
   border-radius: 50%;
-  background: repeating-radial-gradient(
-    ellipse at 50% 49%,
-    transparent 0 69px,
-    #6b9cb716 70px 71px
-  );
-  transform: rotate(-12deg);
-  opacity: 0.8;
 }
 .connections {
   position: absolute;
@@ -54,13 +48,13 @@
   top: 49%;
   width: 190px;
   height: 190px;
-  transform: translate(-50%, -50%);
-  perspective: 900px;
+  transform: translate(-50%, -50%) translateZ(35px);
+  transform-style: preserve-3d;
 }
 .plane {
   position: absolute;
   inset: 0;
-  border-radius: 29px;
+  border-radius: 18px;
   transform: rotate(-10deg);
   border: 1px solid #ffffffd9;
 }
@@ -68,30 +62,51 @@
   background: linear-gradient(135deg, #79b5df65, #9dbae28c);
   inset: 24px -6px -24px 6px;
   box-shadow: 0 24px 36px #23598517;
-  border-color: #d2e8fb;
+  border-color: #a6c9e4;
 }
 .planeMiddle {
   inset: 12px -3px -12px 3px;
-  background: linear-gradient(135deg, #edf6ffeb, #e4ebfaf2);
-  border-color: #fff;
+  background: linear-gradient(135deg, #edf6ff, #e4ebfa);
   box-shadow: 0 8px 18px #315c8f0a;
 }
+.planeMiddle::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px dashed #9cb9d077;
+  border-radius: 8px;
+}
 .planeFace {
-  background: linear-gradient(130deg, #fffffff8, #f8fbffef);
+  background: linear-gradient(130deg, #fff, #f3f9ff);
   box-shadow: 0 12px 35px #446f9820;
   overflow: hidden;
 }
-.planeFace:before {
-  content: "";
+.mounts {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    110deg,
-    transparent 40%,
-    #ddefff5c 70%,
-    transparent
-  );
-  pointer-events: none;
+  inset: 12px;
+}
+.mounts i {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border: 1px solid #a5bbcc;
+  border-radius: 50%;
+}
+.mounts i:nth-child(1) {
+  top: 0;
+  left: 0;
+}
+.mounts i:nth-child(2) {
+  top: 0;
+  right: 0;
+}
+.mounts i:nth-child(3) {
+  bottom: 0;
+  left: 0;
+}
+.mounts i:nth-child(4) {
+  bottom: 0;
+  right: 0;
 }
 .coreContent {
   position: absolute;
@@ -102,14 +117,6 @@
   flex-direction: column;
   transform: rotate(10deg);
   text-align: center;
-}
-.coreEyebrow {
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 6px;
-  color: #7390a7;
-  margin-bottom: 12px;
-  font-weight: 600;
 }
 .coreContent > strong {
   font-family: var(--display);
@@ -126,14 +133,13 @@
 .coreRule {
   height: 1px;
   width: 32px;
-  background: linear-gradient(90deg, #148fd8, #ffab54);
-  margin: 14px 0 12px;
+  background: #168ed7;
+  margin: 16px 0 13px;
 }
 .coreDetail {
-  color: #536e85;
-  font-size: 11px;
+  color: #42627c;
+  font-size: 12px;
   line-height: 1.5;
-  letter-spacing: -0.15px;
 }
 .node {
   position: absolute;
@@ -141,13 +147,11 @@
   align-items: center;
   gap: 11px;
   padding: 17px 15px;
-  background: #ffffffdd;
-  backdrop-filter: blur(14px);
-  border: 1px solid #fff;
-  border-radius: 13px;
+  background: #fafdff;
+  border: 1px solid #d6e2ed;
+  border-radius: 9px;
   box-shadow: 0 12px 32px #214e7910;
-  z-index: 2;
-  will-change: transform;
+  transform: translateZ(65px);
 }
 .node > div {
   display: flex;
@@ -163,9 +167,9 @@
   color: #133653;
 }
 .node > div > span {
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1.5;
-  color: #7c8fa1;
+  color: #627d92;
   white-space: nowrap;
 }
 .nodeIcon {
@@ -174,135 +178,50 @@
   height: 30px;
   display: grid;
   place-items: center;
-  background: #edf6ff;
-  border-radius: 8px;
   flex-shrink: 0;
-}
-.node > i {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #a3d2ec;
-  position: absolute;
-  right: 12px;
-  top: 12px;
 }
 .software {
   top: 15%;
   left: 1%;
-  transform: rotate(-3deg);
 }
 .infrastructure {
   top: 27%;
   right: -3%;
-  transform: rotate(3deg);
 }
 .equipment {
   top: 64%;
   left: -3%;
-  transform: rotate(-3deg);
 }
 .security {
   bottom: 12%;
   right: 0;
-  transform: rotate(3deg);
 }
 .equipment .nodeIcon,
 .security .nodeIcon {
-  color: #d78637;
-  background: #fff3e4;
-}
-.equipment > i,
-.security > i {
-  background: #efc596;
-}
-.deliverable {
-  position: absolute;
-  left: 36%;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 9px;
-  color: #607c90;
-}
-.deliverable > div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.deliverable strong {
-  font-size: 9px;
-  font-weight: 550;
-  color: #4e6b81;
-}
-.deliverable > div > span {
-  font-size: 8px;
-  color: #8b9baa;
-}
-.check {
-  height: 21px;
-  width: 21px;
-  border: 1px solid #cfe5e4;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  color: #3a9384;
-  background: #f2faf6;
-}
-.sequence {
-  margin: 35px auto 0;
-  width: 70%;
-  position: relative;
-}
-.sequenceLabels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  letter-spacing: 0.1px;
-  color: #8b9daf;
-  gap: 10px;
-}
-.sequenceLabels > span {
-  transition: color 0.3s;
-}
-.stage[data-phase="0"] .sequenceLabels > span:nth-child(1),
-.stage[data-phase="1"] .sequenceLabels > span:nth-child(2),
-.stage[data-phase="2"] .sequenceLabels > span:nth-child(3) {
-  color: #274f71;
-  font-weight: 600;
-}
-.sequenceTrack {
-  height: 1px;
-  background: #d2e0ed;
-  margin-top: 12px;
-  position: relative;
-  overflow: hidden;
-}
-.sequenceTrack > i {
-  position: absolute;
-  inset: 0;
-  transform-origin: left;
-  background: linear-gradient(90deg, #168ed7, #ff9f3a);
+  color: #c67c2e;
 }
 .control {
   position: absolute;
   bottom: 0;
-  right: 2%;
-  border: 1px solid #bdcfe04d;
-  background: #ffffff50;
+  right: 0;
+  border: 1px solid #b7cbdb;
+  background: #f7fbffe6;
   display: flex;
   align-items: center;
-  gap: 6px;
-  border-radius: 20px;
-  padding: 7px 10px;
-  font-size: 8px;
-  color: #8396a7;
+  gap: 7px;
+  border-radius: 5px;
+  min-height: 36px;
+  padding: 8px 11px;
+  font-size: 10px;
+  color: #42627c;
 }
 .control:hover {
-  color: #365c7a;
-  background: #ffffffd9;
+  color: #082c50;
+  background: #fff;
+}
+.control:focus-visible {
+  outline: 2px solid #168ed7;
+  outline-offset: 4px;
 }
 @media (min-width: 1500px) {
   .visual {
@@ -318,9 +237,6 @@
   .node strong {
     font-size: 15px;
   }
-  .node > div > span {
-    font-size: 9px;
-  }
 }
 @media (max-width: 1150px) {
   .visual {
@@ -333,17 +249,16 @@
   .node {
     gap: 8px;
     padding: 14px 11px;
-    border-radius: 11px;
   }
   .node strong {
     font-size: 12px;
   }
   .node > div > span {
-    font-size: 7px;
+    font-size: 8px;
   }
   .nodeIcon {
-    width: 27px;
-    height: 27px;
+    width: 25px;
+    height: 25px;
   }
   .nodeIcon > svg {
     width: 19px;
@@ -352,11 +267,8 @@
   .coreContent > strong {
     font-size: 28px;
   }
-  .coreEyebrow {
-    font-size: 5px;
-  }
   .coreDetail {
-    font-size: 10px;
+    font-size: 11px;
   }
   .infrastructure {
     right: -2%;
@@ -364,14 +276,6 @@
   }
   .security {
     bottom: 9%;
-  }
-  .deliverable {
-    bottom: -1%;
-    left: 29%;
-  }
-  .kicker {
-    font-size: 8px;
-    left: 2%;
   }
 }
 @media (max-width: 900px) and (min-width: 651px) {
@@ -390,32 +294,24 @@
     font-size: 11px;
   }
   .node > div > span {
-    font-size: 6px;
+    font-size: 7px;
   }
   .nodeIcon {
-    width: 24px;
-    height: 24px;
+    width: 23px;
+    height: 23px;
   }
   .nodeIcon > svg {
     width: 17px;
     height: 17px;
   }
-  .node > i {
-    display: none;
-  }
   .coreContent > strong {
     font-size: 25px;
   }
   .coreDetail {
-    font-size: 9px;
+    font-size: 10px;
   }
   .coreRule {
     margin-block: 10px;
-  }
-  .coreEyebrow {
-    font-size: 4px;
-    letter-spacing: 0.8px;
-    margin-bottom: 10px;
   }
   .software {
     left: -2%;
@@ -430,119 +326,68 @@
   .security {
     right: -4%;
   }
-  .kicker {
-    left: 0;
-    font-size: 7px;
-  }
-  .sequence {
-    width: 82%;
-    margin-top: 27px;
-  }
-  .sequenceLabels {
-    font-size: 8px;
-  }
-  .deliverable {
-    left: 23%;
-  }
-  .deliverable strong {
-    font-size: 8px;
-  }
-  .deliverable > div > span {
-    font-size: 7px;
-  }
 }
 @media (max-width: 650px) {
   .stage {
-    padding: 14px 0 42px;
+    padding: 0 0 44px;
     margin-top: 4px;
   }
   .visual {
     aspect-ratio: 1;
-    min-height: 400px;
-  }
-  .kicker {
-    top: 1%;
-    left: 4%;
-    font-size: 8px;
+    min-height: 370px;
+    perspective: 1600px;
   }
   .core {
-    width: 150px;
-    height: 150px;
+    width: 145px;
+    height: 145px;
     top: 48%;
   }
   .coreContent > strong {
     font-size: 27px;
   }
-  .coreEyebrow {
-    font-size: 5px;
-    letter-spacing: 0.8px;
-  }
   .coreDetail {
-    font-size: 10px;
+    font-size: 11px;
   }
   .node {
-    gap: 8px;
-    padding: 13px 11px;
-    border-radius: 11px;
+    gap: 5px;
+    padding: 12px 9px;
+    border-radius: 7px;
   }
   .node strong {
     font-size: 12px;
   }
   .node > div > span {
-    font-size: 6px;
+    font-size: 7px;
   }
   .nodeIcon {
-    width: 26px;
-    height: 26px;
+    width: 23px;
+    height: 23px;
   }
   .nodeIcon > svg {
     width: 18px;
     height: 18px;
   }
-  .node > i {
-    display: none;
-  }
   .software {
-    left: 0;
-    top: 13%;
+    left: 1%;
+    top: 7%;
   }
   .infrastructure {
     right: 0;
-    top: 16%;
+    top: 11%;
   }
   .equipment {
-    left: 0;
-    top: 66%;
+    left: 1%;
+    top: 73%;
   }
   .security {
     right: 0;
-    bottom: 12%;
+    bottom: 9%;
   }
   .plane {
-    border-radius: 24px;
-  }
-  .deliverable {
-    left: 27%;
-    bottom: -1%;
-  }
-  .deliverable strong {
-    font-size: 8px;
-  }
-  .deliverable > div > span {
-    font-size: 7px;
-  }
-  .sequence {
-    margin-top: 28px;
-    width: 78%;
-  }
-  .sequenceLabels {
-    font-size: 8px;
+    border-radius: 15px;
   }
   .control {
-    bottom: 0;
-    right: 0;
-    font-size: 7px;
-    padding: 6px 9px;
+    min-height: 44px;
   }
 }
 @media (max-width: 360px) {
@@ -556,46 +401,28 @@
   .coreContent > strong {
     font-size: 23px;
   }
-  .coreEyebrow {
-    font-size: 4px;
-  }
   .coreDetail {
-    font-size: 9px;
+    font-size: 10px;
   }
   .coreRule {
     margin-block: 10px;
   }
   .node {
-    padding: 11px 8px;
-    gap: 6px;
+    padding: 10px 7px;
+    gap: 4px;
   }
   .node strong {
     font-size: 10px;
   }
+  .node > div > span {
+    font-size: 6px;
+  }
   .nodeIcon {
-    width: 23px;
-    height: 23px;
+    width: 20px;
+    height: 20px;
   }
   .nodeIcon > svg {
     width: 16px;
     height: 16px;
-  }
-  .node > div > span {
-    font-size: 5px;
-  }
-  .kicker {
-    font-size: 7px;
-  }
-  .deliverable {
-    left: 21%;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .node,
-  .plane {
-    will-change: auto;
-  }
-  .sequenceTrack > i {
-    transform: scaleX(1);
   }
 }

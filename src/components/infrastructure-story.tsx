@@ -157,9 +157,6 @@ export function InfrastructureStory() {
         <div className="infrastructure-grid">
           <div className="infrastructure-visual">
             <TechnologyScene mode="story" storyProgress={progress} />
-            <div className="infrastructure-caption">
-              <span className="status-dot" /> A connected systems illustration
-            </div>
           </div>
           <div className="infrastructure-chapters">
             {chapters.map((chapter, i) => (

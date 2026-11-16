@@ -50,7 +50,7 @@ export default function Home() {
           <div className="container hero-grid">
             <div className="hero-copy">
               <p className="eyebrow">
-                <span className="status-dot" /> Solutions & consultancy · Lahore
+                <span className="status-dot" /> Technology solutions · Lahore
               </p>
               <h1>
                 <span className="line-clip">
@@ -63,9 +63,9 @@ export default function Home() {
                 </span>
               </h1>
               <p className="hero-description">
-                Your business challenge comes first. We bring software,
-                equipment, networks and security together to build a practical
-                solution around it.
+                Our engineers design software, specify IT equipment and
+                integrate networks and security systems for offices,
+                construction sites and public-sector projects.
               </p>
               <div className="button-row">
                 <Link className="button" href="/services/">
@@ -75,15 +75,11 @@ export default function Home() {
                   Talk about your project <Arrow />
                 </Link>
               </div>
-              <div className="hero-footnote">
-                <span className="mini-line" /> From understanding the problem to
-                putting the solution to work.
-              </div>
             </div>
             <HeroSolution />
           </div>
           <div className="hero-bottom container">
-            <span>Better connected. Better equipped.</span>
+            <span>Software · Infrastructure · Systems integration</span>
             <a
               href="#infrastructure"
               aria-label="Explore the connected infrastructure story"
