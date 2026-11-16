@@ -37,7 +37,12 @@ if ($written===false) { flock($lock,LOCK_UN); fclose($lock); respond(503,['ok'=>
 @chmod($target,0600);
 $history[]=time(); rewind($lock); ftruncate($lock,0); fwrite($lock,json_encode($history)); fflush($lock); flock($lock,LOCK_UN); fclose($lock);
 $body="New MeritX website enquiry\nReference: ".$reference."\n\nName: ".$name."\nEmail: ".$email."\nCompany: ".$company."\nPhone: ".$phone."\nService: ".$service."\n\n".$message;
-$headers=['From: MeritX Website <website@meritxsc.com>','Reply-To: '.$email,'Content-Type: text/plain; charset=UTF-8'];
-// Delivery is best-effort; the private record is the durable source of truth.
-if (function_exists('mail')) { @mail('info@meritxsc.com','MeritX enquiry '.$reference,$body,implode("\r\n",$headers)); }
+$headers=['From: MeritX Website <info@meritxsc.com>','Reply-To: '.$email,'Content-Type: text/plain; charset=UTF-8','Message-ID: <'.strtolower($reference).'@meritxsc.com>'];
+// The envelope sender matches the configured domain; Reply-To remains the visitor.
+// Acceptance by the hosting mail system is recorded separately from inbox delivery.
+$accepted=false;
+if (function_exists('mail')) { $accepted=@mail('info@meritxsc.com','MeritX enquiry '.$reference,$body,implode("\r\n",$headers),'-finfo@meritxsc.com'); }
+$record['notification']=['recipient'=>'info@meritxsc.com','transport'=>'hosting-mail','status'=>$accepted?'accepted':'not_accepted','attempted_at'=>gmdate('c')];
+@file_put_contents($target,json_encode($record,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE),LOCK_EX);
+@chmod($target,0600);
 respond(201,['ok'=>true,'reference'=>$reference]);

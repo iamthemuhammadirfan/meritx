@@ -33,14 +33,16 @@ The GitHub workflow installs from the lockfile, lints, typechecks and builds wit
 - `/about/`: company approach, principles and intended customer sectors.
 - `/contact/`: confirmed address, telephone, WhatsApp, email and enquiry form.
 - `/privacy/`: handling of enquiries and external service links.
+- `/it-equipment/business-laptops/`: quote-led laptop supply, workload comparison and procurement FAQs.
+- `/guides/business-laptop-buying-guide/`: a substantive business buying and deployment checklist.
 
 Shared business details live in `src/lib/business.ts`; service content lives in `src/lib/services.ts`. The site does not claim customer logos, certifications, project counts, testimonials or guaranteed tender outcomes.
 
 ## Visuals and motion
 
-The supplied logo is preserved in `docs/brand/`; an optimised copy is served from `public/images/`. Two generated illustrative assets and their full prompts are documented in `docs/visual-assets.json`. These images do not represent actual client installations.
+The supplied logo is preserved in `docs/brand/`; an optimised copy is served from `public/images/`. Generated illustrative assets and their prompts are documented in `docs/visual-assets.json`. These images do not represent actual client installations.
 
-The home page contains a real Three.js scene of interconnected servers, a laptop, a camera and network equipment. It loads near the viewport, caps rendering resolution, stops drawing when hidden/offscreen and exposes a pause control. A generated static image remains available if WebGL cannot initialise. Reduced-motion visitors get a still scene. Geometry, materials, observers and event handlers are cleaned up on navigation.
+The home page contains a dedicated scroll-driven Three.js story of interconnected servers, a laptop, a camera and network equipment. GSAP pins the story on desktop and drives assembly rotation, server separation, cable visibility and four content chapters from one progress value. Inactive chapters are inert and hidden from assistive technology. Mobile and reduced-motion layouts show the full chapter content without pinning. It loads near the viewport, caps rendering resolution, stops drawing when hidden/offscreen and exposes a pause control. A generated static image remains available if WebGL cannot initialise. Reduced-motion visitors get a still scene. Geometry, materials, observers and event handlers are cleaned up on navigation.
 
 GSAP handles headline entrances, section reveals, image parallax and the delivery timeline. It honours reduced-motion preferences and reverts on route changes. Content remains visible when animation JavaScript is unavailable. Fonts are bundled locally.
 
@@ -48,7 +50,7 @@ GSAP handles headline entrances, section reveals, image parallax and the deliver
 
 `public/api/enquiry.php` is served by Spaceship's PHP runtime. It validates input, restricts browser origins, requires consent, includes a honeypot and limits repeated submissions. It writes a private JSON record **outside the document root** under `~/.meritx-enquiries/`, with directory permissions `0700` and file permissions `0600`.
 
-The endpoint returns a receipt only after the private record is saved. Email notification to `info@meritxsc.com` is best-effort; a successful `mail()` call is not proof of inbox delivery. Mailbox and MX configuration need to be verified separately. Use the hosting account/MCP to read private enquiry records; do not expose the directory or add it to Git. The site does not add submitters to a mailing list.
+The endpoint returns a receipt only after the private record is saved. Email notification to `info@meritxsc.com` is best-effort; a successful `mail()` call is not proof of inbox delivery. The domain now uses Spacemail MX records. An owner-approved live test (MX-20261116-B611F743) was saved, accepted by the mail transport and confirmed received by the owner. A notification-status field records transport acceptance separately from inbox delivery. See `docs/enquiry-handling.txt` for reading emails and private backups. Use the hosting account/MCP to read private enquiry records; do not expose the directory or add it to Git. The site does not add submitters to a mailing list.
 
 Backend validation was exercised in a separate private QA directory with email sending disabled, including invalid input, consent, origin checks, durable storage, private permissions and rate limiting. Do not use genuine customer information in tests.
 

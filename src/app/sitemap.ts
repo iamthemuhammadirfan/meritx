@@ -10,6 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/about/",
     "/contact/",
     "/privacy/",
+    "/it-equipment/business-laptops/",
+    "/guides/business-laptop-buying-guide/",
     ...services.map((s) => `/services/${s.slug}/`),
   ].map((path) => ({ url: `${site.url}${path}` }));
 }

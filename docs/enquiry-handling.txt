@@ -1,0 +1,33 @@
+MERITX WEBSITE ENQUIRIES
+
+1. Read incoming enquiries
+Open https://www.spacemail.com and sign in to info@meritxsc.com.
+Notifications have a subject such as “MeritX enquiry MX-20261116-B611F743”.
+The email contains the name, visitor email, company, phone (if supplied), service and message.
+The Reply-To header points to the visitor's submitted email, so Reply addresses the visitor.
+
+2. Retrieve the private backup
+Open Spaceship hosting > cPanel > File Manager.
+Navigate to the hosting account's home directory, not the public website folder.
+In File Manager settings, enable “Show Hidden Files (dotfiles)” if needed.
+Open .meritx-enquiries. Each MX-...json file is one saved enquiry.
+Use View to read a record or Download to keep a copy. Do not move this folder into the public website folder.
+Files beginning .rate- are spam-limiting state, not enquiries.
+
+3. Understand notification status
+Each record includes the original submitted fields and a notification object.
+“accepted” means PHP's hosting mail transport accepted the notification, not a guarantee of final inbox placement.
+“not_accepted” means the email attempt was not accepted; the saved enquiry still exists.
+If a notification is missing, search Spam/Junk and the reference before asking for another submission.
+
+4. Confirmed live test
+A single test enquiry was explicitly approved by the site owner.
+Reference: MX-20261116-B611F743.
+The private record was verified and the owner confirmed receipt in Spacemail on 16 November 2026.
+No mailbox password was needed. Delivery uses the hosting mail transport to the domain's configured Spacemail MX servers.
+The sender/envelope is info@meritxsc.com; Reply-To is the form visitor.
+
+5. Protect customer information
+Enquiry backups are outside the web-served folder with private file permissions.
+They are preserved when the website release is replaced.
+Local downloads belong in .private/, which is excluded from Git and deployment.

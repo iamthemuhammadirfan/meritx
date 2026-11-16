@@ -24,6 +24,10 @@ export function SiteFooter() {
           <div>
             <h2>Explore</h2>
             <Link href="/services/">Services</Link>
+            <Link href="/it-equipment/business-laptops/">Business laptops</Link>
+            <Link href="/guides/business-laptop-buying-guide/">
+              Laptop buying guide
+            </Link>
             <Link href="/about/">About MeritX</Link>
             <Link href="/contact/">Contact us</Link>
           </div>

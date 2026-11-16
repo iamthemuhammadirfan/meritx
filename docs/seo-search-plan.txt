@@ -1,0 +1,37 @@
+MERITX SEARCH CONTENT PLAN — 16 NOVEMBER 2026
+
+Commercial intent and useful destinations
+- IT equipment supplier Lahore: homepage and /services/it-equipment/
+- Business laptop supplier Lahore; bulk office laptop quotation: /it-equipment/business-laptops/
+- Choosing office laptops; business laptop procurement checklist: /guides/business-laptop-buying-guide/
+- Office networking, structured cabling and Wi-Fi installation Lahore: /services/networking-infrastructure/
+- CCTV camera installation Lahore: /services/cctv-surveillance/
+- Custom software development Lahore: /services/software-solutions/
+- IT installation and technical support Lahore: /services/installation-support/
+
+These are relevance targets, not measured search volumes or ranking claims. The pages answer different buyer needs and link to one another. Existing service URLs are retained. There are no invented prices, stock quantities, partner certifications, testimonials, project counts or product offers.
+
+Implemented
+- Distinct page titles and descriptions, canonical URLs and social previews.
+- Server-rendered content, semantic headings and crawlable navigation.
+- Accurate business address, phone, email and Lahore service context.
+- A distinct laptop supply page with workload selection, warranty/quotation questions and procurement requirements.
+- A substantive buying guide, rather than duplicated location pages.
+- Relevant service details, images and internal links.
+- Organization/ProfessionalService and Service data, plus BreadcrumbList data matching visible navigation.
+- A sitemap containing the public content and robots.txt allowing indexing.
+- Optimised local image assets and progressive motion with mobile/reduced-motion fallbacks.
+
+What the owner should do next
+1. Add meritxsc.com as a domain property in Google Search Console and complete Google's DNS verification.
+2. Submit https://meritxsc.com/sitemap.xml; use URL Inspection to review the main service and laptop pages.
+3. Confirm or claim the Google Business Profile using the real business identity and verified address/contact details.
+4. Provide real projects, approved installation photos, buyer questions and referenceable outcomes so the site can gain original evidence over time.
+5. If a product catalogue is wanted, provide actual models, current prices, stock and warranty terms. Product/Offer data should reflect genuine purchasable products, not generic illustrative images.
+6. Review Search Console query, impression, click and indexing data after Google has had time to process the changes. Improve pages from that evidence.
+
+No code change or animation can guarantee first place for “buy laptops” or any other query. Specific business and local intent is a more useful starting point for this supplier than presenting an unverified retail catalogue.
+
+Official guidance
+https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+https://developers.google.com/search/docs/fundamentals/creating-helpful-content

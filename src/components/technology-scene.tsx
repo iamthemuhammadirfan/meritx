@@ -1,11 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type * as Three from "three";
 import { Pause, Play } from "lucide-react";
 
-export function TechnologyScene() {
+export function TechnologyScene({
+  mode = "hero",
+  storyProgress,
+}: {
+  mode?: "hero" | "story";
+  storyProgress?: RefObject<number>;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const pause = useRef(false);
   const [paused, setPaused] = useState(false);
@@ -118,11 +124,16 @@ export function TechnologyScene() {
       );
       plinth.position.y = -0.85;
       core.add(plinth);
+      const serverUnits: Three.Group[] = [];
       for (let i = 0; i < 3; i++) {
-        const y = -0.55 + i * 0.43;
-        box(2.35, 0.34, 1.45, graphite, 0, y, 0, core);
+        const unit = new T.Group();
+        unit.position.y = -0.55 + i * 0.43;
+        core.add(unit);
+        serverUnits.push(unit);
+        const y = 0;
+        box(2.35, 0.34, 1.45, graphite, 0, y, 0, unit);
         for (let j = 0; j < 4; j++) {
-          box(0.42, 0.2, 0.025, black, -0.81 + j * 0.49, y, 0.737, core);
+          box(0.42, 0.2, 0.025, black, -0.81 + j * 0.49, y, 0.737, unit);
           box(
             0.23,
             0.025,
@@ -131,7 +142,7 @@ export function TechnologyScene() {
             -0.81 + j * 0.49,
             y + 0.025,
             0.758,
-            core,
+            unit,
           );
           box(
             0.03,
@@ -141,12 +152,12 @@ export function TechnologyScene() {
             -0.94 + j * 0.49,
             y - 0.065,
             0.76,
-            core,
+            unit,
           );
         }
-        box(0.055, 0.19, 0.08, amber, 1.08, y, 0.77, core);
+        box(0.055, 0.19, 0.08, amber, 1.08, y, 0.77, unit);
       }
-      box(1.5, 0.08, 0.9, silver, 0, 0.6, 0, core);
+      const serverLid = box(1.5, 0.08, 0.9, silver, 0, 0.6, 0, core);
 
       // Laptop: a tilted display and keyboard deck.
       const laptop = new T.Group();
@@ -232,17 +243,19 @@ export function TechnologyScene() {
         ]),
       ];
       const pulses: Three.Mesh[] = [];
+      const cables: Three.Mesh[] = [];
       paths.forEach((curve, i) => {
-        assembly.add(
-          new T.Mesh(
-            new T.TubeGeometry(curve, 50, 0.017, 8, false),
-            new T.MeshStandardMaterial({
-              color: i === 1 ? 0x00a3ff : 0xffa028,
-              roughness: 0.4,
-              metalness: 0.3,
-            }),
-          ),
+        const cable = new T.Mesh(
+          new T.TubeGeometry(curve, 50, 0.017, 8, false),
+          new T.MeshStandardMaterial({
+            color: i === 1 ? 0x00a3ff : 0xffa028,
+            roughness: 0.4,
+            metalness: 0.3,
+            transparent: true,
+          }),
         );
+        assembly.add(cable);
+        cables.push(cable);
         const pulse = new T.Mesh(
           new T.SphereGeometry(0.045, 12, 10),
           i === 1 ? cyan : amber,
@@ -252,6 +265,7 @@ export function TechnologyScene() {
       });
 
       let visible = true;
+      let lastStoryProgress = -1;
       let pointerX = 0;
       let pointerY = 0;
       let time = 0;
@@ -292,16 +306,41 @@ export function TechnologyScene() {
       renderer.setAnimationLoop((now) => {
         const delta = Math.min((now - previous) / 1000, 0.05);
         previous = now;
-        if (!visible || document.hidden || pause.current || reduced.matches)
+        const chapter = storyProgress?.current ?? 0.65;
+        const storyChanged = mode === "story" && chapter !== lastStoryProgress;
+        if (
+          !visible ||
+          document.hidden ||
+          pause.current ||
+          (reduced.matches && !storyChanged)
+        )
           return;
+        lastStoryProgress = chapter;
         time += delta;
         assembly.rotation.y +=
           (-0.34 +
             pointerX +
-            Math.sin(time * 0.18) * 0.08 -
+            (mode === "story"
+              ? chapter * 0.85 - 0.25
+              : Math.sin(time * 0.18) * 0.08) -
             assembly.rotation.y) *
           0.035;
         assembly.rotation.x += (0.03 + pointerY - assembly.rotation.x) * 0.035;
+        const spread = mode === "story" ? Math.sin(Math.PI * chapter) : 0;
+        serverUnits.forEach((unit, i) => {
+          unit.position.y = -0.55 + i * (0.43 + spread * 0.18);
+        });
+        serverLid.position.y = 0.6 + spread * 0.55;
+        laptop.position.x = 2.2 + (mode === "story" ? (1 - chapter) * 0.4 : 0);
+        network.position.x =
+          -2.1 - (mode === "story" ? (1 - chapter) * 0.3 : 0);
+        cctv.scale.setScalar(
+          mode === "story" ? 0.9 + Math.sin(chapter * Math.PI) * 0.15 : 1,
+        );
+        cables.forEach((cable) => {
+          (cable.material as Three.MeshStandardMaterial).opacity =
+            mode === "story" ? Math.min(1, 0.1 + chapter * 2) : 1;
+        });
         laptop.position.y = 1.05 + Math.sin(time * 0.8) * 0.08;
         cctv.position.y = 1.55 + Math.sin(time * 0.8 + 2) * 0.07;
         paths.forEach((curve, i) => {
@@ -346,23 +385,30 @@ export function TechnologyScene() {
       visible.disconnect();
       dispose?.();
     };
-  }, []);
+  }, [mode, storyProgress]);
 
   return (
-    <div className={`technology-scene ${ready ? "scene-ready" : ""}`}>
+    <div
+      className={`technology-scene ${mode === "story" ? "story-scene" : ""} ${ready ? "scene-ready" : ""}`}
+    >
       <Image
         className="scene-fallback"
         src="/images/technology-suite.webp"
-        alt="Illustrative technology suite of servers, networking equipment, a security camera and a laptop"
+        alt={
+          ready
+            ? ""
+            : "Illustrative technology suite of servers, networking equipment, a security camera and a laptop"
+        }
         width={1536}
         height={1024}
-        loading="eager"
-        fetchPriority="high"
+        loading={mode === "story" ? "lazy" : "eager"}
+        fetchPriority={mode === "story" ? "auto" : "high"}
       />
       <div
         className="scene-canvas"
         ref={host}
         role="img"
+        aria-hidden={!ready}
         aria-label="Interactive 3D illustration connecting servers, a laptop, a security camera and network equipment"
       />
       <span className="scene-label scene-label-top">

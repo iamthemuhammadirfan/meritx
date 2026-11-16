@@ -17,10 +17,10 @@ export function Motion() {
       const media = gsap.matchMedia();
       media.add("(prefers-reduced-motion: no-preference)", () => {
         gsap.from("[data-hero-line]", {
-          yPercent: 110,
+          yPercent: 55,
           opacity: 0,
-          duration: 1.15,
-          stagger: 0.12,
+          duration: 0.8,
+          stagger: 0.09,
           ease: "power3.out",
           clearProps: "all",
         });

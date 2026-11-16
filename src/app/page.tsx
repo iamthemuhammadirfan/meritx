@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, Check, Building2, HardHat, Landmark } from "lucide-react";
 import { Arrow, ServiceIcon } from "@/components/icons";
-import { TechnologyScene } from "@/components/technology-scene";
+import { InfrastructureStory } from "@/components/infrastructure-story";
 import { CtaSection } from "@/components/cta-section";
 import { services, processSteps } from "@/lib/services";
 import { site } from "@/lib/site";
@@ -20,7 +20,10 @@ export default function Home() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
+    "@id": site.url + "/#business",
     name: business.fullName,
+    logo: site.url + "/images/meritx-logo.webp",
+    areaServed: { "@type": "City", name: "Lahore" },
     url: site.url,
     email: business.email,
     telephone: business.phoneHref,
@@ -46,28 +49,27 @@ export default function Home() {
           <div className="container hero-grid">
             <div className="hero-copy">
               <p className="eyebrow">
-                <span className="status-dot" /> MeritX Solutions & Consultants
+                <span className="status-dot" /> IT equipment & software
+                solutions · Lahore
               </p>
               <h1>
                 <span className="line-clip">
-                  <span data-hero-line>Technology.</span>
-                </span>
-                <span className="line-clip">
-                  <span data-hero-line>Working</span>
+                  <span data-hero-line>Equip your</span>
                 </span>
                 <span className="line-clip">
                   <span data-hero-line className="gradient-text">
-                    for you.
+                    next chapter.
                   </span>
                 </span>
               </h1>
               <p className="hero-description">
-                Software that simplifies. Equipment that delivers.
-                Infrastructure that connects it all.
+                Business laptops, custom software, office networks and CCTV.
+                From the first specification to the final installation, MeritX
+                brings your technology requirements together.
               </p>
               <div className="button-row">
                 <Link className="button" href="/services/">
-                  Explore our solutions <Arrow />
+                  Find your IT solution <Arrow />
                 </Link>
                 <Link className="text-link" href="/contact/">
                   Talk about your project <Arrow />
@@ -78,12 +80,37 @@ export default function Home() {
                 the final installation.
               </div>
             </div>
-            <TechnologyScene />
+            <div className="hero-equipment-stage">
+              <div className="hero-equipment-frame">
+                <Image
+                  src="/images/business-laptop-fleet.webp"
+                  alt="Illustrative business laptops and docking equipment for office procurement"
+                  width={1536}
+                  height={1024}
+                  loading="eager"
+                  fetchPriority="high"
+                />
+              </div>
+              <div className="equipment-stage-caption">
+                <span className="status-dot" /> For offices, teams & project
+                sites
+              </div>
+              <Link
+                className="equipment-stage-link"
+                href="/it-equipment/business-laptops/"
+              >
+                Business laptop supply <Arrow />
+              </Link>
+              <span className="visual-disclosure">Illustrative equipment</span>
+            </div>
           </div>
           <div className="hero-bottom container">
             <span>Better connected. Better equipped.</span>
-            <a href="#capabilities" aria-label="Scroll to our capabilities">
-              Discover MeritX <ArrowDown size={16} />
+            <a
+              href="#infrastructure"
+              aria-label="Explore the connected infrastructure story"
+            >
+              See how it works <ArrowDown size={16} />
             </a>
           </div>
         </section>
@@ -108,7 +135,9 @@ export default function Home() {
             </span>
           </div>
         </section>
+        <InfrastructureStory />
         <section id="capabilities" className="section capabilities container">
+          <span id="services" className="anchor-target" aria-hidden="true" />
           <div className="section-heading" data-reveal>
             <div>
               <p className="eyebrow">The complete picture</p>
@@ -227,6 +256,25 @@ export default function Home() {
                 key={s.slug}
                 data-reveal
               >
+                <Image
+                  className="compact-media"
+                  src={
+                    s.slug === "networking-infrastructure"
+                      ? "/images/network-installation.webp"
+                      : s.slug === "cctv-surveillance"
+                        ? "/images/technology-suite.webp"
+                        : "/images/connected-workspace.webp"
+                  }
+                  alt={
+                    s.slug === "networking-infrastructure"
+                      ? "Illustrative technician organising office network cabling"
+                      : s.slug === "cctv-surveillance"
+                        ? "Illustrative security and IT equipment"
+                        : "Illustrative installed office IT infrastructure"
+                  }
+                  width={1536}
+                  height={1024}
+                />
                 <div className="card-top">
                   <span className="icon-tile">
                     <ServiceIcon name={s.icon} />
@@ -239,6 +287,53 @@ export default function Home() {
                 </div>
               </Link>
             ))}
+          </div>
+        </section>
+        <section className="container laptop-feature section">
+          <div className="laptop-feature-image" data-reveal>
+            <Image
+              src="/images/business-laptop-fleet.webp"
+              alt="Illustrative selection of office laptops, a workstation and a docking station"
+              width={1536}
+              height={1024}
+            />
+            <span>Illustrative equipment selection</span>
+          </div>
+          <div data-reveal>
+            <p className="eyebrow">Buying laptops for your business?</p>
+            <h2>
+              The right fit.
+              <br />
+              Beyond the price tag.
+            </h2>
+            <p>
+              Office users, mobile teams and engineering applications have
+              different requirements. We help you compare the specification,
+              warranty and rollout requirements before you commit.
+            </p>
+            <ul className="feature-checks">
+              <li>
+                <Check size={17} /> Clear model and configuration details
+              </li>
+              <li>
+                <Check size={17} /> Quantity-based quotations and suitable
+                alternatives
+              </li>
+              <li>
+                <Check size={17} /> Setup and deployment options in the proposal
+              </li>
+            </ul>
+            <div className="button-row">
+              <Link className="button" href="/it-equipment/business-laptops/">
+                Business laptops in Lahore <Arrow />
+              </Link>
+              <Link
+                className="text-link"
+                href="/guides/business-laptop-buying-guide/"
+              >
+                Read the buying guide <Arrow />
+              </Link>
+            </div>
           </div>
         </section>
         <section className="image-story">
