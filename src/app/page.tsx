@@ -1,3 +1,4 @@
+import { HeroSolution } from "@/components/hero-solution";
 import { pageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -49,8 +50,7 @@ export default function Home() {
           <div className="container hero-grid">
             <div className="hero-copy">
               <p className="eyebrow">
-                <span className="status-dot" /> IT equipment & software
-                solutions · Lahore
+                <span className="status-dot" /> Solutions & consultancy · Lahore
               </p>
               <h1>
                 <span className="line-clip">
@@ -63,46 +63,24 @@ export default function Home() {
                 </span>
               </h1>
               <p className="hero-description">
-                Business laptops, custom software, office networks and CCTV.
-                From the first specification to the final installation, MeritX
-                brings your technology requirements together.
+                Your business challenge comes first. We bring software,
+                equipment, networks and security together to build a practical
+                solution around it.
               </p>
               <div className="button-row">
                 <Link className="button" href="/services/">
-                  Find your IT solution <Arrow />
+                  Explore our solutions <Arrow />
                 </Link>
                 <Link className="text-link" href="/contact/">
                   Talk about your project <Arrow />
                 </Link>
               </div>
               <div className="hero-footnote">
-                <span className="mini-line" /> From the right specification to
-                the final installation.
+                <span className="mini-line" /> From understanding the problem to
+                putting the solution to work.
               </div>
             </div>
-            <div className="hero-equipment-stage">
-              <div className="hero-equipment-frame">
-                <Image
-                  src="/images/business-laptop-fleet.webp"
-                  alt="Illustrative business laptops and docking equipment for office procurement"
-                  width={1536}
-                  height={1024}
-                  loading="eager"
-                  fetchPriority="high"
-                />
-              </div>
-              <div className="equipment-stage-caption">
-                <span className="status-dot" /> For offices, teams & project
-                sites
-              </div>
-              <Link
-                className="equipment-stage-link"
-                href="/it-equipment/business-laptops/"
-              >
-                Business laptop supply <Arrow />
-              </Link>
-              <span className="visual-disclosure">Illustrative equipment</span>
-            </div>
+            <HeroSolution />
           </div>
           <div className="hero-bottom container">
             <span>Better connected. Better equipped.</span>
