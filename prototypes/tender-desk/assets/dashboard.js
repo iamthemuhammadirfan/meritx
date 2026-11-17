@@ -141,7 +141,7 @@
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 20000);
     try {
-      const response = await fetch('/api/tenders.php', { cache: 'no-cache', credentials: 'omit', signal: controller.signal });
+      const response = await fetch('/api/tenders', { cache: 'no-cache', credentials: 'omit', signal: controller.signal });
       if (!response.ok) throw new Error('The latest feed could not be loaded. Please try again.');
       const next = await response.json();
       if (next.schemaVersion !== 1 || !Array.isArray(next.tenders) || !Array.isArray(next.sources)) throw new Error('The feed format could not be read. Please try again.');

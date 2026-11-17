@@ -46,7 +46,7 @@ SOURCES = [
      'url': 'https://pitb.gov.pk/tendernotices', 'coverage': 'Official PITB notices; recent listings. Other Punjab departments are not yet included.'},
     {'key': 'punjab-central', 'name': 'Punjab central procurement portal', 'region': 'Punjab',
      'url': 'https://eproc.punjab.gov.pk/ActiveTenders.aspx',
-     'coverage': 'Availability monitoring only; notices are not included until its connector is verified.'},
+     'coverage': 'The central portal is being checked for availability. Its notices are not included yet.'},
 ]
 
 
@@ -380,7 +380,7 @@ def collect_pitb(client, now):
         if closed_pages >= 3:
             break
     return list({r['id']: r for r in records}.values()), {'pagesChecked': pages,
-        'listingComplete': False, 'coverage': 'Recent PITB notices; stops after three expired listing pages or 20 pages. Historical long-running opportunities may require a source check.'}
+        'listingComplete': False, 'coverage': 'Recent official PITB notices. Coverage is limited to this department; older long-running opportunities may require an extra source check.'}
 
 
 def friendly_error(error):
@@ -431,7 +431,7 @@ def run(data_dir, detail_limit=120):
                 if source['key'] == 'punjab-central':
                     # Probe only: no claims of full Punjab coverage until its schema is verified.
                     client.get(source['url'])
-                    state.update(status='pending', error='Portal reachable; listing connector still needs verification.', count=0)
+                    state.update(status='pending', error='The portal is reachable; its notices are not included yet.', count=0)
                 else:
                     records, metadata = collect_federal(client, db, now, detail_limit) if source['key'] == 'federal-epads' else collect_pitb(client, now)
                     update_records(db, records, now, metadata['listingComplete'], source['key'])

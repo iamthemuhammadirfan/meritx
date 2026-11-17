@@ -17,3 +17,6 @@ DirectoryIndex index.html
 <FilesMatch "\.(py|md|json|gz)$">
   Require all denied
 </FilesMatch>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json
+</IfModule>

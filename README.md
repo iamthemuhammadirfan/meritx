@@ -70,8 +70,8 @@ Use the **Roll back Spaceship** GitHub workflow on `main` to restore the previou
 
 Static export does not support request-time Next.js SSR, Server Actions or ISR. A future migration to a Node.js host requires removing `output: "export"` and adapting the PHP endpoint. `npm start` is reserved for that Node.js deployment; the current export uses `npm run preview`.
 
-## Tender dashboard prototype
+## Tender dashboard
 
-The team review prototype is live at **https://tenders.meritxsc.com/**. Its standalone source is in `prototypes/tender-desk/`, separate from the Next.js marketing site. It covers fictional Punjab and federal notices with Lahore priority. Filters, tender details, sample briefs, changes and browser-local shortlists work; live collection, logins, shared records and company eligibility checks are not connected.
+The dashboard is live at **https://tenders.meritxsc.com/**, with official federal EPADS and selected Punjab departmental notices, Lahore priority and collection at 06:00 Pakistan time daily. Its standalone source is in `prototypes/tender-desk/`, separate from the Next.js marketing site. The central Punjab portal is currently unavailable and newspaper intake is planned; the Sources view shows actual coverage and freshness. Company details, logins, shared records and eligibility checks are deferred. Shortlists remain browser-local.
 
-Deploy only the prototype's `index.html`, `.htaccess` and `assets/` to its dedicated subdomain document root. See `prototypes/tender-desk/README.md` for deployment details. Keep this output separate from marketing-site releases and private company records.
+The live release still uses a read-only PHP snapshot endpoint. Development replaces that endpoint with FastAPI + Uvicorn at `/api/tenders`, retaining the separate Python collector. This candidate needs an ASGI-capable host and an explicit production release; uploading its frontend alone would break the live feed. See `prototypes/tender-desk/README.md` for local preview, migration, operation and recovery, and `docs/tender-platform-plan.txt` for newspaper OCR and future company workspaces. Keep this application separate from marketing-site releases and private company records.
