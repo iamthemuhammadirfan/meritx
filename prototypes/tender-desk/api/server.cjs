@@ -96,8 +96,11 @@ class SnapshotStore {
     const key = `${stale}:${compressed}`;
     if (!this.variants.has(key)) {
       let body = Buffer.from(JSON.stringify({ ...this.payload, stale }));
+      // LiteSpeed can decompress upstream gzip for identity clients. A weak
+      // validator identifies equivalent JSON across those wire transformations.
+      const etag = `W/"${createHash('sha256').update(body).digest('hex')}"`;
       if (compressed) body = gzipSync(body, { level: 6 });
-      this.variants.set(key, { body, etag: `"${createHash('sha256').update(body).digest('hex')}"`, stale });
+      this.variants.set(key, { body, etag, stale });
     }
     return this.variants.get(key);
   }
@@ -117,7 +120,7 @@ function quality(header, name) {
 }
 
 function etagMatches(header, etag) {
-  return header.split(',').some(value => ['*', etag].includes(value.trim().replace(/^W\//, '')));
+  return header.split(',').some(value => ['*', etag.replace(/^W\//, '')].includes(value.trim().replace(/^W\//, '')));
 }
 
 const CONTENT_TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',

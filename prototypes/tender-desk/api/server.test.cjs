@@ -57,13 +57,14 @@ test('public projection excludes future private root, tender and nested fields',
   assert.equal(response.json().stale, false);
 });
 
-test('gzip and identity have distinct ETags and correct actual wire lengths', async () => {
+test('gzip and identity share a weak semantic validator and have correct wire lengths', async () => {
   const gzip = await request('/api/tenders', { headers: { 'Accept-Encoding': 'gzip' } });
   const identity = await request();
   assert.equal(gzip.headers['content-encoding'], 'gzip');
   assert.equal(identity.headers['content-encoding'], undefined);
   assert.deepEqual(JSON.parse(gunzipSync(gzip.body)), identity.json());
-  assert.notEqual(gzip.headers.etag, identity.headers.etag);
+  assert.equal(gzip.headers.etag, identity.headers.etag);
+  assert.match(identity.headers.etag, /^W\/"[a-f0-9]{64}"$/);
   assert.equal(gzip.headers.vary, 'Accept-Encoding');
   assert.equal(Number(gzip.headers['content-length']), gzip.body.length);
   assert.equal(Number(identity.headers['content-length']), identity.body.length);
@@ -76,16 +77,17 @@ test('encoding negotiation honors zero quality and unacceptable representations'
   assert.equal(rejected.status, 406);
 });
 
-test('HEAD and conditional GET have no body, and gzip conditions remain representation-specific', async () => {
+test('HEAD and conditional GET have no body across equivalent compressed responses', async () => {
   const get = await request();
   const head = await request('/api/tenders', { method: 'HEAD' });
   assert.equal(head.body.length, 0);
   assert.equal(head.headers['content-length'], get.headers['content-length']);
-  const unchanged = await request('/api/tenders', { headers: { 'If-None-Match': `W/${get.headers.etag}` } });
+  const unchanged = await request('/api/tenders', { headers: { 'If-None-Match': get.headers.etag.replace(/^W\//, '') } });
   assert.equal(unchanged.status, 304);
   assert.equal(unchanged.body.length, 0);
   const changedEncoding = await request('/api/tenders', { headers: { 'Accept-Encoding': 'gzip', 'If-None-Match': get.headers.etag } });
-  assert.equal(changedEncoding.status, 200);
+  assert.equal(changedEncoding.status, 304);
+  assert.equal(changedEncoding.body.length, 0);
 });
 
 test('atomic replacement invalidates cache with the same file size and timestamp', async () => {
