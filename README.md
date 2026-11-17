@@ -69,3 +69,9 @@ Use the **Roll back Spaceship** GitHub workflow on `main` to restore the previou
 `.codex/config.toml` registers the Spaceship `meritx` server only for this trusted project. `.codex/mcp_headers.py` reads `MERITX_MCP_TOKEN` from this folder's private `.env`. No credential is imported by the frontend or stored in tracked configuration. If the project folder moves, update the helper's absolute command path.
 
 Static export does not support request-time Next.js SSR, Server Actions or ISR. A future migration to a Node.js host requires removing `output: "export"` and adapting the PHP endpoint. `npm start` is reserved for that Node.js deployment; the current export uses `npm run preview`.
+
+## Tender dashboard
+
+The dashboard is live at **https://tenders.meritxsc.com/**, with official federal EPADS and selected Punjab departmental notices, Lahore priority and collection at 06:00 Pakistan time daily. Its standalone source is in `prototypes/tender-desk/`, separate from the Next.js marketing site. The central Punjab portal is currently unavailable and newspaper intake is planned; the Sources view shows actual coverage and freshness. Company details, logins, shared records and eligibility checks are deferred. Shortlists remain browser-local.
+
+The live release still uses a read-only PHP snapshot endpoint. Development replaces it with a Node.js API at `/api/tenders`, retaining the separate Python collector. CloudLinux Node Selector and Passenger are enabled on the existing Spaceship account. This candidate needs app registration and an explicit production release; uploading its frontend alone would break the live feed. See `prototypes/tender-desk/README.md` for local preview, migration, operation and recovery, and `docs/tender-platform-plan.txt` for newspaper OCR and future company workspaces. Keep this application separate from marketing-site releases and private company records.

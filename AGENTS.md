@@ -10,8 +10,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Branch and deployment workflow
 
-- Make and push ongoing changes on `development`. Keep production changes out of `main` until they are ready to ship.
-- Release by opening a pull request from `development` to `main` and merging after the `validate` check passes.
+- Make and push all ongoing changes on `development`.
+- Merge to `main` and deploy to production only when the user explicitly asks to ship to production. Completing a task or passing checks does not authorize a release.
+- After that explicit request, release through a pull request from `development` to `main` and merge after the `validate` check passes.
 - Every successful push to `main` automatically deploys the marketing site to Spaceship. `development` and pull requests only run checks.
 - Production deployment credentials belong only in the GitHub `production` environment. Never commit private keys or hosting tokens.
 - See `docs/deployment.txt` for rollback, release handling and deployment-key maintenance. Keep the separate tender prototype out of the marketing site's `out/` deployment.

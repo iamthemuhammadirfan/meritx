@@ -6,8 +6,13 @@ The default working branch is development. Push ongoing work there; validation
 runs on pushes to development and main, and on pull requests. Development and
 pull-request builds have search indexing disabled and never deploy production.
 
-To ship, open a pull request with base main and head development. Merge after
-the validate check passes. A push to main runs lint, type checks, release tests
+Keep all ongoing changes on development. Merge to main and deploy production
+only when the user explicitly asks to ship to production. Completing a task
+or passing checks does not authorize a release.
+
+After that explicit request, open a pull request with base main and head
+development. Merge after the validate check passes.
+A push to main runs lint, type checks, release tests
 and a production static build with indexing enabled. Only after they all pass
 does the deploy job publish that exact build to https://meritxsc.com.
 

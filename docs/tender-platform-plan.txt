@@ -1,0 +1,97 @@
+MeritX Tender Desk — live collection and product plan
+17 November 2026
+
+Current release
+
+One shared, public catalog of official notices serves the dashboard at
+https://tenders.meritxsc.com/. A private Python 3.13 collector runs on Spaceship
+at 06:00 Asia/Karachi every day. The web application reads an atomic JSON
+snapshot through a read-only PHP endpoint. It never starts a crawl on page load.
+SQLite, raw responses and collector code stay outside the web document root.
+
+Development migration: replace the read-only PHP endpoint with a Node.js API at
+/api/tenders. The existing Spaceship account has CloudLinux Node Selector and
+Passenger active, with Node 22 verified by a loopback HTTP test. Its Python
+Selector also works, but uses WSGI rather than native FastAPI/Uvicorn ASGI.
+Node.js fits the existing host's managed web application path. Python stays a
+separate scheduled worker; later OCR work also runs outside API requests. Cache
+the atomic public snapshot and retain compression, provenance and freshness.
+The candidate is not deployed. Register and verify the app on the tender
+subdomain only after an explicit production request. See the tender README for
+the local candidate, hosting evidence, cutover and rollback sequence.
+
+Sources connected: Federal EPADS open procurement listings and recent Punjab
+Information Technology Board departmental notices. Punjab's central procurement
+portal currently times out from the hosting server. Its availability is checked,
+but its notices are not included. This is selected Punjab coverage, not a
+complete provincial feed. Historical long-running PITB notices can require an
+extra source check. Source status, last success and collection times are shown.
+
+Stable federal references and exact document URLs identify records. First/last
+seen dates, observed deadline/title changes and source amendment flags are kept.
+Failed source collections retain last-good records. Exact EPADS deadlines come
+from published dates, official countdown timestamps, or bidding documents.
+Date-only departmental notices never acquire guessed submission times.
+
+The initial title-matching rules cover IT equipment, networking, CCTV, software
+and IT support. They are explainable keywords, not eligibility or win scores.
+Lahore in a notice title is distinguished from a buyer based in Lahore. The
+latter does not establish the delivery site. Company registrations, credentials,
+financial capacity, team accounts and shared shortlists are not implemented.
+The current shortlist is local to each browser. The catalog is publicly readable;
+search-engine exclusion is not authentication.
+
+Newspaper intake — across papers, tracked by publisher and edition
+
+1. Establish source access: licensed publisher feeds, authorized e-paper access,
+   agency-hosted newspaper notices or documents supplied by an authorized user.
+   Record which newspapers, cities, editions and dates are actually covered.
+   Do not promise all papers until the coverage register supports that claim.
+   Review publisher terms and redistribution permissions before paid coverage.
+
+2. Collect newspaper pages or ad images through source-specific scheduled jobs.
+   Store the original file, publication/edition/date/page and a content hash in
+   private object storage. Never evade login, paywalls, CAPTCHAs or source limits.
+
+3. Detect/crop tender advertisements. Use existing multilingual OCR or a vision
+   model for Urdu/English text. Prefer existing text layers in PDFs. A custom
+   trained model is not required for the first version. Evaluate candidate OCR
+   systems on a labeled set of actual ads, including low-resolution Urdu scans.
+
+4. Extract a fixed structured schema: buyer, tender reference, scope, location,
+   publication date, submission date/time/timezone, bid security, source URL and
+   supporting documents. Keep field-level evidence (page, crop or text span).
+   Treat ad text as untrusted data, not instructions to the extraction system.
+
+5. Validate dates and amounts with deterministic checks. Compare important
+   fields with the agency notice where available. Low-confidence dates,
+   ambiguous amounts and contradictions go to human review. Do not publish a
+   guessed deadline or automatically mark a company eligible.
+
+6. Resolve duplicates across official portals, multiple newspapers and repeat
+   ads using buyer + reference, document hashes and date/scope evidence. Keep
+   source provenance and versions; publish corrigenda as revisions. Fuzzy
+   similarity alone must not silently combine different tenders.
+
+7. Publish validated records to the shared catalog, retaining links and permitted
+   excerpts. Publisher scans and full ads need the appropriate redistribution
+   rights. Monitor missing editions, failed fetches and extraction quality.
+
+Commercial platform — subsequent release, not part of today's integration
+
+Keep discovery separate from company workspaces. Ingestion runs once per source;
+each company gets its own saved searches, preferred cities/services, notification
+preferences, registrations, documents, team memberships and pursuit workflow.
+
+Before accepting paying customers, add authentication, tenant-scoped database
+queries and file storage, role permissions, an audit trail, backups and restore
+checks, account/billing management, source-coverage disclosures and service
+monitoring. Move the shared catalog and tenant data to a managed PostgreSQL
+database, use a queue for document/OCR work, and private object storage for scans.
+Do not build a separate scraper for every customer.
+
+Suggested sequence: prove reliable official collection; broaden Punjab agency
+coverage; pilot newspaper OCR with real licensed samples; then add private
+company workspaces and commercial subscriptions. Measure missing tenders,
+duplicate merges, deadline accuracy, source freshness and cost per accepted
+notice before promising complete coverage or a service level.

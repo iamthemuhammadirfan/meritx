@@ -5,5 +5,16 @@ import nextTypescript from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTypescript,
-  globalIgnores([".next/**", "out/**", "next-env.d.ts"]),
+  {
+    files: ["prototypes/tender-desk/**/*.cjs"],
+    // Passenger loads this standalone application through CommonJS.
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    ".private/**",
+    "next-env.d.ts",
+    "prototypes/tender-desk/assets/lucide-0.468.0.min.js",
+  ]),
 ]);
