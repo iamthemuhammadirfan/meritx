@@ -5,5 +5,11 @@ import nextTypescript from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTypescript,
-  globalIgnores([".next/**", "out/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    ".private/**",
+    "next-env.d.ts",
+    "prototypes/tender-desk/assets/lucide-0.468.0.min.js",
+  ]),
 ]);

@@ -69,3 +69,9 @@ Use the **Roll back Spaceship** GitHub workflow on `main` to restore the previou
 `.codex/config.toml` registers the Spaceship `meritx` server only for this trusted project. `.codex/mcp_headers.py` reads `MERITX_MCP_TOKEN` from this folder's private `.env`. No credential is imported by the frontend or stored in tracked configuration. If the project folder moves, update the helper's absolute command path.
 
 Static export does not support request-time Next.js SSR, Server Actions or ISR. A future migration to a Node.js host requires removing `output: "export"` and adapting the PHP endpoint. `npm start` is reserved for that Node.js deployment; the current export uses `npm run preview`.
+
+## Tender dashboard prototype
+
+The team review prototype is live at **https://tenders.meritxsc.com/**. Its standalone source is in `prototypes/tender-desk/`, separate from the Next.js marketing site. It covers fictional Punjab and federal notices with Lahore priority. Filters, tender details, sample briefs, changes and browser-local shortlists work; live collection, logins, shared records and company eligibility checks are not connected.
+
+Deploy only the prototype's `index.html`, `.htaccess` and `assets/` to its dedicated subdomain document root. See `prototypes/tender-desk/README.md` for deployment details. Keep this output separate from marketing-site releases and private company records.
