@@ -6,19 +6,17 @@ Current release
 One shared, public catalog of official notices serves the dashboard at
 https://tenders.meritxsc.com/. A private Python 3.13 collector runs on Spaceship
 at 06:00 Asia/Karachi every day. The web application reads an atomic JSON
-snapshot through a read-only PHP endpoint. It never starts a crawl on page load.
+snapshot through a read-only Node.js endpoint. It never starts a crawl on page load.
 SQLite, raw responses and collector code stay outside the web document root.
 
-Development migration: replace the read-only PHP endpoint with a Node.js API at
-/api/tenders. The existing Spaceship account has CloudLinux Node Selector and
+The web API runs at /api/tenders. The existing Spaceship account has Node Selector and
 Passenger active, with Node 22 verified by a loopback HTTP test. Its Python
 Selector also works, but uses WSGI rather than native FastAPI/Uvicorn ASGI.
 Node.js fits the existing host's managed web application path. Python stays a
 separate scheduled worker; later OCR work also runs outside API requests. Cache
 the atomic public snapshot and retain compression, provenance and freshness.
-The candidate is not deployed. Register and verify the app on the tender
-subdomain only after an explicit production request. See the tender README for
-the local candidate, hosting evidence, cutover and rollback sequence.
+The Node app is registered on the tender subdomain; the old PHP route is retired.
+See the tender README for local operation, hosting evidence and rollback.
 
 Sources connected: Federal EPADS open procurement listings and recent Punjab
 Information Technology Board departmental notices. Punjab's central procurement
