@@ -1,0 +1,92 @@
+MERITX BRANCHES AND AUTOMATIC SPACESHIP DEPLOYMENT
+
+Daily development
+
+The default working branch is development. Push ongoing work there; validation
+runs on pushes to development and main, and on pull requests. Development and
+pull-request builds have search indexing disabled and never deploy production.
+
+To ship, open a pull request with base main and head development. Merge after
+the validate check passes. A push to main runs lint, type checks, release tests
+and a production static build with indexing enabled. Only after they all pass
+does the deploy job publish that exact build to https://meritxsc.com.
+
+Keep development after merging a release. Before starting more work, fetch and
+merge origin/main into development so the production merge commit is included.
+The main branch requires a pull request and passing validate checks; no extra
+reviewer approval is required for this single-owner repository.
+
+GitHub configuration
+
+Workflow: .github/workflows/ci.yml
+Rollback: .github/workflows/rollback.yml
+Production environment: production, restricted to the main branch
+Secret: SPACESHIP_SSH_PRIVATE_KEY, stored only in that environment
+Pinned host key: .github/spaceship_known_hosts
+SSH destination: rhjnctqjdv@server38.shared.spaceship.host, port 21098
+
+The dedicated SSH key has a forced command and disables interactive sessions,
+forwarding and user startup files. It can only run status, deploy or rollback
+through /home/rhjnctqjdv/.meritx-deploy/github/release.py. Deployment does not
+depend on the short-lived local MERITX_MCP_TOKEN. That token remains for local
+hosting administration and is not sent to GitHub.
+
+The server-side entry point is installed from scripts/spaceship_release.py.
+Changing that file in Git does not automatically replace the trusted entry
+point. Install reviewed updates through the project Spaceship MCP connection,
+then verify restricted SSH access. The deployment key cannot update its own
+entry point or authorized_keys.
+
+Release handling
+
+Only the contents of out/ are uploaded, including .htaccess and api/enquiry.php.
+Source, .env, prototypes and company records are not included. GitHub verifies
+the build before deployment. The host verifies the upload's SHA-256 checksum,
+rejects unsafe archive paths and links, checks required files and PHP syntax,
+and refuses a noindex build.
+
+Staging, state and the previous release are under ~/.meritx-deploy/github/,
+outside every document root and protected by a private directory. The handler
+uses Linux RENAME_EXCHANGE to swap the complete release with ~/meritxsc.com in
+one atomic operation. The document root remains a real directory, preserving
+the enquiry endpoint's existing private-storage location.
+
+The host then checks the public release identifier, home page, contact page
+and PHP endpoint. The PHP check uses GET and expects 405; it sends no enquiries
+or emails. If health checks fail, the old site is restored and deployment
+fails. A journal recovers interrupted swaps on the next release operation.
+
+The previous release stays available after each successful deployment. Older
+managed releases are removed only after the new release is healthy. Existing
+manual deployment archives outside the github/ directory are left alone.
+GitHub deploy and rollback workflows share a serialized queue; a host lock also
+prevents overlapping release operations. An active release is never canceled
+by a newer workflow run.
+
+Private enquiries remain in ~/.meritx-enquiries/ and are never replaced.
+The tenders subdomain has a separate document root and is not deployed here.
+
+Rollback
+
+1. In GitHub Actions, open the last successful production run and copy its
+   Live release value from the deploy job summary. The current identifier is
+   also at https://meritxsc.com/release.json (commit and release ID only).
+2. Select Roll back Spaceship, Run workflow, and choose the main branch.
+3. Paste the full current release ID into expected_release and run it.
+
+The handler refuses rollback if production has changed since the copied ID.
+It atomically restores the previous release and verifies the restored site.
+The displaced release becomes the new rollback target, allowing a reversal.
+Before the first automated release, the existing site is called baseline.
+Rollback changes hosted files only; it does not change Git. Revert or fix the
+bad changes on development before the next production merge, otherwise a later
+push to main can publish them again.
+
+Key rotation
+
+Generate a new dedicated SSH key, install its public key with the same forced
+command and restrict options through the hosting administration connection,
+and replace the production environment secret. Verify status and a deployment
+before removing the old authorized key. Never commit or print private keys.
+If Spaceship changes its SSH host key, verify the replacement independently
+through the trusted hosting connection before updating the pinned host key.

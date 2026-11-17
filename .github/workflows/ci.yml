@@ -1,25 +1,69 @@
-name: Validate MeritX
+name: Validate and deploy MeritX
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   pull_request:
 
 permissions:
   contents: read
 
+concurrency:
+  group: meritx-${{ github.ref }}
+  queue: max
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
       - run: npm run build
         env:
           NEXT_PUBLIC_SITE_URL: https://meritxsc.com
-          SITE_INDEXABLE: "false"
+          SITE_INDEXABLE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'true' || 'false' }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: production-site
+          path: out/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://meritxsc.com
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: production-site
+          path: out/
+      - name: Install deployment key
+        env:
+          SPACESHIP_SSH_PRIVATE_KEY: ${{ secrets.SPACESHIP_SSH_PRIVATE_KEY }}
+        run: |
+          test -n "$SPACESHIP_SSH_PRIVATE_KEY"
+          umask 077
+          printf '%s\n' "$SPACESHIP_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/spaceship_key"
+      - name: Deploy and verify production
+        env:
+          SPACESHIP_SSH_KEY_FILE: ${{ runner.temp }}/spaceship_key
+          SPACESHIP_KNOWN_HOSTS_FILE: .github/spaceship_known_hosts
+        run: python3 scripts/deploy_spaceship.py deploy
+      - name: Remove deployment key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/spaceship_key"

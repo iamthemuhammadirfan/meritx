@@ -1,0 +1,43 @@
+name: Roll back Spaceship
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_release:
+        description: Live release ID from the latest successful deployment summary
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: meritx-refs/heads/main
+  queue: max
+
+jobs:
+  rollback:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://meritxsc.com
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install deployment key
+        env:
+          SPACESHIP_SSH_PRIVATE_KEY: ${{ secrets.SPACESHIP_SSH_PRIVATE_KEY }}
+        run: |
+          test -n "$SPACESHIP_SSH_PRIVATE_KEY"
+          umask 077
+          printf '%s\n' "$SPACESHIP_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/spaceship_key"
+      - name: Restore and verify previous release
+        env:
+          EXPECTED_RELEASE: ${{ inputs.expected_release }}
+          SPACESHIP_SSH_KEY_FILE: ${{ runner.temp }}/spaceship_key
+          SPACESHIP_KNOWN_HOSTS_FILE: .github/spaceship_known_hosts
+        run: python3 scripts/deploy_spaceship.py rollback --expected-release "$EXPECTED_RELEASE"
+      - name: Remove deployment key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/spaceship_key"
