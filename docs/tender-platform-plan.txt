@@ -9,14 +9,16 @@ at 06:00 Asia/Karachi every day. The web application reads an atomic JSON
 snapshot through a read-only PHP endpoint. It never starts a crawl on page load.
 SQLite, raw responses and collector code stay outside the web document root.
 
-Development migration: replace the read-only PHP endpoint with FastAPI served
-by Uvicorn at /api/tenders. Python collection stays a separate scheduled worker;
-later OCR work will also run outside API requests. Cache the atomic public
-snapshot in the API and retain its compression, provenance and freshness state.
-The candidate is not deployed. Current Spaceship ASGI supervision/proxy support
-is unverified; confirm a supported route or use an ASGI-capable host before a
-production cutover. See prototypes/tender-desk/README.md for the runnable local
-candidate, container requirements, checks and rollback sequence.
+Development migration: replace the read-only PHP endpoint with a Node.js API at
+/api/tenders. The existing Spaceship account has CloudLinux Node Selector and
+Passenger active, with Node 22 verified by a loopback HTTP test. Its Python
+Selector also works, but uses WSGI rather than native FastAPI/Uvicorn ASGI.
+Node.js fits the existing host's managed web application path. Python stays a
+separate scheduled worker; later OCR work also runs outside API requests. Cache
+the atomic public snapshot and retain compression, provenance and freshness.
+The candidate is not deployed. Register and verify the app on the tender
+subdomain only after an explicit production request. See the tender README for
+the local candidate, hosting evidence, cutover and rollback sequence.
 
 Sources connected: Federal EPADS open procurement listings and recent Punjab
 Information Technology Board departmental notices. Punjab's central procurement

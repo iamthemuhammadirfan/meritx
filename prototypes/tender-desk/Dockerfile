@@ -1,17 +1,12 @@
-FROM python:3.13-slim-bookworm
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
-    MERITX_FEED_PATH=/data/feed.json
+FROM node:22-bookworm-slim
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=8080 MERITX_FEED_PATH=/data/feed.json
 WORKDIR /app
-COPY api/requirements.txt /app/api/requirements.txt
-COPY engine/requirements.txt /app/engine/requirements.txt
-RUN pip install --no-cache-dir -r api/requirements.txt -r engine/requirements.txt \
-    && useradd --create-home --uid 10001 meritx
-COPY api/app.py /app/api/app.py
-COPY engine/collector.py /app/engine/collector.py
+COPY api/server.cjs /app/api/server.cjs
+COPY app.cjs package.json /app/
 COPY index.html /app/index.html
 COPY assets/ /app/assets/
-USER meritx
+USER node
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz',timeout=3)"
-CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+    CMD node -e "require('node:http').get('http://127.0.0.1:8080/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+CMD ["node", "app.cjs"]
