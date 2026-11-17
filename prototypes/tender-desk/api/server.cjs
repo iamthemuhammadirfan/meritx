@@ -35,6 +35,7 @@ function publicFeed(data) {
     tenders: data.tenders.map(item => ({
       ...pick(item, TENDER_FIELDS),
       documents: (item.documents ?? []).filter(isObject).map(document => pick(document, ['label', 'url'])),
+      advertisements: (item.advertisements ?? []).filter(isObject).map(ad => pick(ad, ['label', 'url', 'sourceUrl', 'reference'])),
       matches: (item.matches ?? []).filter(isObject).map(match => pick(match, ['category', 'keyword'])),
       location: pick(item.location, ['city', 'basis']),
       changes: (item.changes ?? []).filter(change => isObject(change) && isObject(change.fields)).slice(0, 5).map(change => ({

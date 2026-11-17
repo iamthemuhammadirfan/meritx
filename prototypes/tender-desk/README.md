@@ -4,6 +4,10 @@ Live at **https://tenders.meritxsc.com/**. Official notices replaced the fiction
 
 ## Coverage and matching
 
+The daily collector also checks Federal PPRA's public tender listings and selects up to 120 active detail pages, prioritizing Lahore and MeritX service keywords. Official advertisement PDFs are linked from the issuing agency's PPRA record. These can include newspaper clippings and publication-ready ad copies. The dashboard's advertisement filter shows this evidence. Exact EPADS references are merged when deadlines agree. Conflicting deadlines keep both records and display a warning. Failed checks retain previously collected evidence.
+
+This connector scans up to 40 listing pages and reports its detail-check limit in Sources. Full newspaper/edition coverage requires publisher or aggregator access. Direct e-paper scans, OCR and comprehensive Punjab newspaper coverage are still pending. Existing Punjab departmental notices remain available. No publisher name or edition is inferred from an advertisement filename.
+
 Federal EPADS public open procurement listings and recent Punjab Information Technology Board notices are connected. Punjab's central procurement portal is currently unreachable from hosting; its availability is checked, but its notices are not represented as collected. PITB coverage is limited to recent departmental notices, up to 20 pages, stopping after three wholly expired pages. Older long-running opportunities can require a source check. Newspapers are not connected yet. Source status, last success and record provenance are visible in the dashboard.
 
 Service matches use explainable title keywords for equipment, networking, CCTV, software and IT support. Electricity-grid networks and railway computer-based interlocking are excluded from these ordinary IT rules. A match is not an eligibility decision or a win prediction. Lahore in the title is distinguished from a buyer located in Lahore; buyer location does not establish the delivery site. Missing deadline times are not guessed.

@@ -3,7 +3,7 @@
   const root = document.getElementById('meritx-desk');
   const $ = selector => root.querySelector(selector);
   const storageKey = 'meritx-tender-desk-live-v1';
-  const state = { view: 'daily', region: 'all', category: 'relevant', search: '', lahoreFirst: true, selected: null, saved: [], limit: 20 };
+  const state = { view: 'daily', region: 'all', category: 'relevant', adsOnly: false, search: '', lahoreFirst: true, selected: null, saved: [], limit: 20 };
   const views = {
     daily: ['Today’s tender brief', 'Official opportunities, with Lahore first.'],
     shortlist: ['Your shortlist', 'Saved in this browser. Team sharing comes later.'],
@@ -60,7 +60,7 @@
       (state.view === 'shortlist' ? state.saved.includes(tender.id) : isOpen(tender)) &&
       (state.view !== 'closing' || (daysLeft(tender) !== null && daysLeft(tender) >= 0 && daysLeft(tender) <= 7)) &&
       (state.view !== 'changes' || changed(tender)) &&
-      (state.region === 'all' || tender.region === state.region) && matchesCategory(tender) &&
+      (state.region === 'all' || tender.region === state.region) && (!state.adsOnly || tender.advertisements?.length > 0) && matchesCategory(tender) &&
       `${tender.title} ${tender.buyer} ${tender.location.city} ${tender.reference || ''} ${tender.sourceName}`.toLowerCase().includes(state.search.toLowerCase())
     ).sort((a, b) => (state.lahoreFirst ? Number(b.location.city === 'Lahore') - Number(a.location.city === 'Lahore') : 0) ||
       (a.closingAt || '9999').localeCompare(b.closingAt || '9999') || a.id.localeCompare(b.id));
@@ -73,6 +73,7 @@
       if (Object.hasOwn(views, saved.view)) state.view = saved.view;
       if (['all', 'Punjab', 'Federal'].includes(saved.region)) state.region = saved.region;
       if (['all', 'relevant', 'IT equipment', 'Networking', 'CCTV', 'Software', 'IT support'].includes(saved.category)) state.category = saved.category;
+      if (typeof saved.adsOnly === 'boolean') state.adsOnly = saved.adsOnly;
       if (typeof saved.search === 'string') state.search = saved.search.slice(0, 200);
       if (typeof saved.lahoreFirst === 'boolean') state.lahoreFirst = saved.lahoreFirst;
       if (typeof saved.selected === 'string') state.selected = saved.selected;
@@ -82,7 +83,7 @@
   function announce(text) { $('#mx-announcer').textContent = text; }
   function renderSources() {
     const sources = feed?.sources || [];
-    $('#mx-source-list').innerHTML = sources.map(source => `<div class="mx-source">${icon('landmark')}<div><h3>${esc(source.name)}</h3><p>${esc(source.coverage)}</p><span class="mx-status" data-health="${esc(source.status)}">${source.status === 'connected' ? 'Connected' : source.status === 'unavailable' ? 'Unavailable' : 'Awaiting verification'} · ${Number(source.count) || 0} collected</span><p class="mx-source-time">Last success: ${source.lastSuccessAt ? dateText(source.lastSuccessAt, true) : 'Not yet'}<br>Last attempt: ${dateText(source.lastAttemptAt, true)}</p>${source.error ? `<p>${esc(source.error)}</p>` : ''}${source.detailErrors ? `<p>${Number(source.detailErrors)} bidding documents could not be refreshed. Listing data remains available.</p>` : ''}${source.detailLimitReached ? '<p>Some documents are awaiting detail checks.</p>' : ''}<a href="${safeHref(source.url)}" target="_blank" rel="noopener noreferrer">Open official source ↗</a></div></div>`).join('') + `<div class="mx-source">${icon('newspaper')}<div><h3>Newspaper advertisements</h3><p>Planned across publishers and editions. OCR, duplicate checks and review of uncertain fields will feed the same catalog.</p><span class="mx-status">Not connected · publisher coverage to be established</span></div></div>`;
+    $('#mx-source-list').innerHTML = sources.map(source => `<div class="mx-source">${icon('landmark')}<div><h3>${esc(source.name)}</h3><p>${esc(source.coverage)}</p><span class="mx-status" data-health="${esc(source.status)}">${source.status === 'connected' ? 'Connected' : source.status === 'unavailable' ? 'Unavailable' : 'Awaiting verification'} · ${Number(source.count) || 0} collected</span><p class="mx-source-time">Last success: ${source.lastSuccessAt ? dateText(source.lastSuccessAt, true) : 'Not yet'}<br>Last attempt: ${dateText(source.lastAttemptAt, true)}</p>${source.error ? `<p>${esc(source.error)}</p>` : ''}${source.detailErrors ? `<p>${Number(source.detailErrors)} document checks failed. Previous evidence remains available.</p>` : ''}${source.detailLimitReached ? '<p>Selected documents checked. Additional notices are outside the current detail-check limit.</p>' : ''}<a href="${safeHref(source.url)}" target="_blank" rel="noopener noreferrer">Open official source ↗</a></div></div>`).join('') + `<div class="mx-source">${icon('newspaper')}<div><h3>Newspaper editions</h3><p>The official ad copies above cover selected notices. Direct newspaper editions and scanned-ad OCR need publisher feeds and review of uncertain fields.</p><span class="mx-status">Full publisher and edition coverage pending</span></div></div>`;
   }
   function renderDetail(tender) {
     if (!tender) return '';
@@ -90,7 +91,7 @@
     const match = tender.matches[0];
     const locationLabel = tender.location.basis === 'buyer' ? `${tender.location.city} · buyer location; delivery location unverified` : `${tender.location.city}${tender.location.basis === 'title' ? ' · from title' : ''}`;
     const closing = tender.closingAt ? `${dateText(tender.closingAt, tender.datePrecision === 'time')}${tender.datePrecision === 'date' ? ' · time not listed' : ''}` : 'Not available — verify official source';
-    return `<div class="mx-detail-top"><div class="mx-eyebrow">${esc(tender.reference || tender.sourceName)}</div><h2>${esc(tender.title)}</h2><p class="mx-detail-buyer">${esc(tender.buyer)}<br>${esc(locationLabel)} · ${esc(tender.region)}</p></div><div class="mx-detail-body"><div class="mx-fit"><strong>${icon('scan-line')}${match ? 'Service keyword match' : 'Browse opportunity'}</strong><p>${match ? `Title contains “${esc(match.keyword)}”, matching ${esc(match.category)}. Specifications and eligibility still need review.` : 'This notice is outside the current MeritX service keywords. Review the official scope if relevant.'}</p></div>${tender.deadlineWarning || tender.detailWarning ? `<div class="mx-notice-warning">${esc(tender.deadlineWarning || tender.detailWarning)}</div>` : ''}<dl class="mx-kv"><div><dt>Submission deadline</dt><dd>${esc(closing)}</dd></div><div><dt>Published by source</dt><dd>${esc(dateText(tender.publishedAt))}</dd></div><div><dt>Source</dt><dd>${esc(tender.sourceName)}</dd></div><div><dt>Service area</dt><dd>${esc(tender.matches.map(item => item.category).join(', ') || 'Other')}</dd></div><div><dt>Last seen in collection</dt><dd>${esc(dateText(tender.lastSeenAt, true))}</dd></div><div><dt>Estimated value / bid security</dt><dd>Check official bidding documents</dd></div></dl><div class="mx-eligibility"><h3>${icon('circle-help')}Eligibility: not assessed</h3><p>Company registrations and supporting details can be added later.</p></div><div class="mx-eligibility"><h3>Next step</h3><p>Read the official notice, confirm the submission deadline and review the required documents.</p></div><div class="mx-actions"><button type="button" class="mx-primary cursor-interaction" data-save="${esc(tender.id)}" aria-pressed="${saved}">${icon(saved ? 'bookmark-check' : 'bookmark')}${saved ? 'Remove from shortlist' : 'Add to shortlist'}</button><a class="mx-secondary" href="${safeHref(tender.sourceUrl)}" target="_blank" rel="noopener noreferrer">${icon('external-link')}Official notice</a>${tender.documents.map(doc => `<a class="mx-link" href="${safeHref(doc.url)}" target="_blank" rel="noopener noreferrer">${esc(doc.label)} ${icon('external-link')}</a>`).join('')}</div></div>${changed(tender) ? `<details class="mx-docs"><summary class="cursor-interaction">Amendments & collection history</summary>${tender.amendmentFlag ? '<p>The source labels this notice as a corrigendum or amendment. Review the original document.</p>' : ''}${tender.changes.map(change => `<p>${esc(dateText(change.recordedAt, true))}: ${Object.entries(change.fields).map(([key, value]) => `${esc(key === 'closingAt' ? 'Deadline' : key)} changed from “${esc(value.before ?? 'not listed')}” to “${esc(value.after ?? 'not listed')}”`).join('; ')}.</p>`).join('')}</details>` : ''}`;
+    return `<div class="mx-detail-top"><div class="mx-eyebrow">${esc(tender.reference || tender.sourceName)}</div><h2>${esc(tender.title)}</h2><p class="mx-detail-buyer">${esc(tender.buyer)}<br>${esc(locationLabel)} · ${esc(tender.region)}</p></div><div class="mx-detail-body"><div class="mx-fit"><strong>${icon('scan-line')}${match ? 'Service keyword match' : 'Browse opportunity'}</strong><p>${match ? `Title contains “${esc(match.keyword)}”, matching ${esc(match.category)}. Specifications and eligibility still need review.` : 'This notice is outside the current MeritX service keywords. Review the official scope if relevant.'}</p></div>${tender.deadlineWarning || tender.detailWarning ? `<div class="mx-notice-warning">${esc(tender.deadlineWarning || tender.detailWarning)}</div>` : ''}<dl class="mx-kv"><div><dt>Submission deadline</dt><dd>${esc(closing)}</dd></div><div><dt>Published by source</dt><dd>${esc(dateText(tender.publishedAt))}</dd></div><div><dt>Source</dt><dd>${esc(tender.sourceName)}</dd></div><div><dt>Service area</dt><dd>${esc(tender.matches.map(item => item.category).join(', ') || 'Other')}</dd></div><div><dt>Last seen in collection</dt><dd>${esc(dateText(tender.lastSeenAt, true))}</dd></div><div><dt>Estimated value / bid security</dt><dd>Check official bidding documents</dd></div></dl><div class="mx-eligibility"><h3>${icon('circle-help')}Eligibility: not assessed</h3><p>Company registrations and supporting details can be added later.</p></div><div class="mx-eligibility"><h3>Next step</h3><p>Read the official notice, confirm the submission deadline and review the required documents.</p></div>${tender.advertisements?.length ? `<div class="mx-eligibility"><h3>Advertisement evidence</h3><p>Official copies supplied by the procuring agency. Check the document for newspaper and edition details.</p>${tender.advertisements.map(ad => `<p><a href="${safeHref(ad.url)}" target="_blank" rel="noopener noreferrer">${esc(ad.label)} · ${esc(ad.reference)}</a></p>`).join('')}</div>` : ''}<div class="mx-actions"><button type="button" class="mx-primary cursor-interaction" data-save="${esc(tender.id)}" aria-pressed="${saved}">${icon(saved ? 'bookmark-check' : 'bookmark')}${saved ? 'Remove from shortlist' : 'Add to shortlist'}</button><a class="mx-secondary" href="${safeHref(tender.sourceUrl)}" target="_blank" rel="noopener noreferrer">${icon('external-link')}Official notice</a>${tender.documents.map(doc => `<a class="mx-link" href="${safeHref(doc.url)}" target="_blank" rel="noopener noreferrer">${esc(doc.label)} ${icon('external-link')}</a>`).join('')}</div></div>${changed(tender) ? `<details class="mx-docs"><summary class="cursor-interaction">Amendments & collection history</summary>${tender.amendmentFlag ? '<p>The source labels this notice as a corrigendum or amendment. Review the original document.</p>' : ''}${tender.changes.map(change => `<p>${esc(dateText(change.recordedAt, true))}: ${Object.entries(change.fields).map(([key, value]) => `${esc(key === 'closingAt' ? 'Deadline' : key)} changed from “${esc(value.before ?? 'not listed')}” to “${esc(value.after ?? 'not listed')}”`).join('; ')}.</p>`).join('')}</details>` : ''}`;
   }
   function render() {
     const active = document.activeElement;
@@ -119,6 +120,7 @@
     $('#mx-search').value = state.search;
     $('#mx-category').value = state.category;
     $('#mx-lahore-first').checked = state.lahoreFirst;
+    $('#mx-ads-only').checked = state.adsOnly;
     root.querySelectorAll('[data-region]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.region === state.region)));
     $('#mx-sort-label').textContent = state.lahoreFirst ? 'Lahore → deadline' : 'Nearest known deadline';
     renderSources();
@@ -157,17 +159,18 @@
   root.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button || !root.contains(button)) return;
-    if (button.dataset.view) { state.view = button.dataset.view; state.search = ''; state.region = 'all'; state.category = state.view === 'shortlist' ? 'all' : 'relevant'; state.limit = 20; announce(''); }
+    if (button.dataset.view) { state.adsOnly = false; state.view = button.dataset.view; state.search = ''; state.region = 'all'; state.category = state.view === 'shortlist' ? 'all' : 'relevant'; state.limit = 20; announce(''); }
     else if (button.dataset.region) { state.region = button.dataset.region; state.limit = 20; }
     else if (button.dataset.tender) { state.selected = button.dataset.tender; }
     else if (button.dataset.save) { const id = button.dataset.save; const saved = state.saved.includes(id); state.saved = saved ? state.saved.filter(item => item !== id) : [...state.saved, id]; announce(`${saved ? 'Removed from' : 'Added to'} shortlist. Saved in this browser only.`); }
-    else if (button.dataset.reset) { state.view = 'daily'; state.region = 'all'; state.category = 'relevant'; state.search = ''; state.limit = 20; }
+    else if (button.dataset.reset) { state.adsOnly = false; state.view = 'daily'; state.region = 'all'; state.category = 'relevant'; state.search = ''; state.limit = 20; }
     else if (button.dataset.more) { state.limit += 20; }
     else if (button.dataset.retry) { announce('Retrying the tender feed…'); loadFeed(); return; }
     render(); persist();
     if (button.dataset.tender && window.matchMedia('(max-width:600px)').matches) $('#mx-detail').scrollIntoView({ block: 'start' });
   });
   $('#mx-search').addEventListener('input', event => { state.search = event.target.value; state.limit = 20; render(); announce(`${visibleTenders().length} opportunities found.`); persist(); });
+  $('#mx-ads-only').addEventListener('change', event => { state.adsOnly = event.target.checked; state.limit = 20; render(); persist(); });
   $('#mx-category').addEventListener('change', event => { state.category = event.target.value; state.limit = 20; render(); persist(); });
   $('#mx-lahore-first').addEventListener('change', event => { state.lahoreFirst = event.target.checked; render(); persist(); });
   window.addEventListener('storage', event => { if (event.key === storageKey) { restore(); render(); } });

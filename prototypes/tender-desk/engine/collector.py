@@ -27,7 +27,10 @@ from bs4 import BeautifulSoup
 PKT = ZoneInfo('Asia/Karachi')
 AGENT = 'MeritXTenderDesk/1.0 (+https://tenders.meritxsc.com/)'
 ALLOWED_HOSTS = {'epads.gov.pk', 'www.epads.gov.pk', 'pa.epads.gov.pk',
-                 'pitb.gov.pk', 'www.pitb.gov.pk', 'eproc.punjab.gov.pk', 'ep.punjab.gov.pk'}
+                 'pitb.gov.pk', 'www.pitb.gov.pk', 'eproc.punjab.gov.pk', 'ep.punjab.gov.pk',
+                 'epms.ppra.gov.pk'}
+PRESS_LIST = 'https://epms.ppra.gov.pk/public/tenders/active-tenders'
+PRESS_DETAIL = '/public/tenders/tender-details/'
 DATE_PATTERN = r'(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s*[AP]M'
 RULES = {
     'IT equipment': r'\b(?:laptops?|desktops?|computers?|workstations?|servers?|printers?|scanners?|tablets?|it hardware|it equipment|san storage|data cent(?:er|re))\b',
@@ -47,6 +50,8 @@ SOURCES = [
     {'key': 'punjab-central', 'name': 'Punjab central procurement portal', 'region': 'Punjab',
      'url': 'https://eproc.punjab.gov.pk/ActiveTenders.aspx',
      'coverage': 'The central portal is being checked for availability. Its notices are not included yet.'},
+    {'key': 'federal-print', 'name': 'Federal PPRA advertisements', 'region': 'Federal',
+     'url': PRESS_LIST, 'coverage': 'Official advertisement copies attached to selected current PPRA notices. Publisher and edition coverage is not established.'},
 ]
 
 
@@ -383,6 +388,107 @@ def collect_pitb(client, now):
         'listingComplete': False, 'coverage': 'Recent official PITB notices. Coverage is limited to this department; older long-running opportunities may require an extra source check.'}
 
 
+def parse_press_listing(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    records = []
+    for row in soup.select('table tbody tr'):
+        link = row.select_one(f'a[href^="{PRESS_DETAIL}"]')
+        if not link:
+            continue
+        cells = {td.get('data-label'): td for td in row.find_all('td', recursive=False)}
+        number = re.fullmatch(PRESS_DETAIL + r'([A-Z]{2}\d{10,14}E?)', link['href'])
+        if not number or not {'Tender Details', 'Tender No', 'Status', 'Advertised', 'Closing'} <= cells.keys():
+            raise ValueError('PPRA advertisement listing structure changed')
+        status = clean(cells['Status'].get_text(' ', strip=True))
+        if not status.startswith('Published') or 'Procurement' not in cells['Tender No'].get_text(' ', strip=True):
+            continue
+        details = cells['Tender Details']
+        title = clean(details.strong.get_text(' ', strip=True))
+        closing = datetime.strptime(clean(cells['Closing'].get_text(' ', strip=True)), '%b %d, %Y %I:%M %p').replace(tzinfo=PKT)
+        published = datetime.strptime(clean(cells['Advertised'].get_text(' ', strip=True)), '%b %d, %Y').date()
+        following = row.find_next_sibling('tr')
+        office = following.select_one('.cb-rt-grid > div .cb-rt-dv') if following else None
+        buyer = clean(office.get_text(' ', strip=True)) if office else 'Buyer not stated'
+        ref = details.select_one('.badge.text-muted')
+        records.append({
+            'id': 'PPRA-' + number[1], 'reference': number[1], 'sourceKey': 'federal-print',
+            'portalReference': clean(ref.get_text(' ', strip=True)) if ref else None,
+            'title': title, 'buyer': buyer, 'region': 'Federal',
+            'sourceUrl': urljoin(PRESS_LIST, link['href']), 'publishedAt': published.isoformat(),
+            'closingAt': closing.isoformat(), 'datePrecision': 'time', 'procurementType': 'Official advertisement',
+            'amendmentFlag': 'Corrigendum' in status, 'documents': [], 'location': infer_location(title, buyer),
+        })
+    if not soup.select_one('td[data-label="Tender No"]'):
+        raise ValueError('PPRA listing returned no recognizable tender rows')
+    next_link = next((a for a in soup.select('a.page-link[href]') if clean(a.get_text()) == 'Next'), None)
+    return records, urljoin(PRESS_LIST, next_link['href']) if next_link else None
+
+
+def parse_press_advertisement(record, html):
+    soup = BeautifulSoup(html, 'html.parser')
+    heading = soup.find('h1')
+    if not heading or record['reference'] not in heading.parent.get_text(' ', strip=True):
+        raise ValueError('PPRA detail returned an unexpected tender')
+    for link in soup.select('a[href^="/pdf?file="]'):
+        if clean(link.get_text(' ', strip=True)) == 'Download Advertisement':
+            return safe_url(urljoin(PRESS_LIST, link['href']))
+    return None
+
+
+def collect_press(client, now):
+    candidates, seen_pages = {}, set()
+    url = PRESS_LIST
+    while url and len(seen_pages) < 40:
+        if url in seen_pages:
+            raise ValueError('PPRA advertisement pagination repeated a page')
+        seen_pages.add(url)
+        page, next_url = parse_press_listing(client.get(url))
+        candidates.update((record['id'], record) for record in page)
+        if next_url and (urlsplit(next_url).netloc != urlsplit(PRESS_LIST).netloc
+                         or urlsplit(next_url).path != urlsplit(PRESS_LIST).path):
+            raise ValueError('Unexpected PPRA advertisement pagination')
+        url = next_url
+    active = [record for record in candidates.values() if record['closingAt'] > now]
+    active.sort(key=lambda record: (record['location']['city'] != 'Lahore',
+                                    not bool(classify(record['title'])), record['closingAt']))
+    selected = active[:120]
+    records, errors = [], 0
+    for record in selected:
+        try:
+            document = parse_press_advertisement(record, client.get(record['sourceUrl']))
+            if document:
+                record['advertisements'] = [{'url': document, 'sourceUrl': record['sourceUrl'],
+                                              'label': 'Official advertisement copy',
+                                              'reference': record['reference']}]
+                record['documents'] = [{'url': document, 'label': 'Official advertisement copy'}]
+                records.append(record)
+        except (OSError, ValueError) as error:
+            errors += 1
+            logging.warning('Advertisement unavailable for %s: %s', record['id'], type(error).__name__)
+    if selected and errors == len(selected):
+        raise ValueError('All selected PPRA advertisement pages were unavailable')
+    return records, {'pagesChecked': len(seen_pages), 'detailsChecked': len(selected), 'detailErrors': errors,
+                     'detailLimitReached': len(active) > len(selected) or bool(url), 'listingComplete': False}
+
+
+def merge_advertisements(tenders):
+    # EPADS references are globally assigned. Keep stable shortlist IDs when
+    # the same procurement appears in both official sources.
+    epads = {item['reference']: item for item in tenders
+             if item.get('sourceKey') == 'federal-epads' and item['listed'] and item.get('reference')}
+    for item in tenders:
+        reference = item.pop('portalReference', None)
+        target = epads.get(reference)
+        if not target or not item.get('advertisements') or not item['listed']:
+            continue
+        target['advertisements'] = item['advertisements']
+        if target.get('closingAt') != item['closingAt']:
+            target['deadlineWarning'] = 'EPADS and the advertisement listing show different deadlines. Check the latest official amendment.'
+            item['deadlineWarning'] = target['deadlineWarning']
+            continue
+        item['listed'] = False
+
+
 def friendly_error(error):
     if isinstance(error, HTTPError):
         return 'Source returned HTTP %s. Previous results retained.' % error.code
@@ -406,9 +512,10 @@ def publish_feed(db, data_dir, now):
         item['sourceStatus'] = source_map[item['sourceKey']]['status']
         item['changes'] = changes.get(item['id'], [])[:5]
         tenders.append(item)
+    merge_advertisements(tenders)
     feed = {'schemaVersion': 1, 'generatedAt': now,
             'schedule': {'time': '06:00', 'timezone': 'Asia/Karachi', 'frequency': 'daily'},
-            'coverageNote': 'Federal EPADS + selected Punjab departmental notices. Central Punjab and newspapers are not included yet.',
+            'coverageNote': 'Federal EPADS, selected Punjab notices and selected official advertisement copies. Full newspaper edition coverage is pending.',
             'sources': sources, 'tenders': tenders}
     atomic_write(data_dir / 'feed.json', json.dumps(feed, ensure_ascii=False, separators=(',', ':')))
     return feed
@@ -433,8 +540,14 @@ def run(data_dir, detail_limit=120):
                     client.get(source['url'])
                     state.update(status='pending', error='The portal is reachable; its notices are not included yet.', count=0)
                 else:
-                    records, metadata = collect_federal(client, db, now, detail_limit) if source['key'] == 'federal-epads' else collect_pitb(client, now)
-                    update_records(db, records, now, metadata['listingComplete'], source['key'])
+                    if source['key'] == 'federal-epads':
+                        records, metadata = collect_federal(client, db, now, detail_limit)
+                    elif source['key'] == 'federal-print':
+                        records, metadata = collect_press(client, now)
+                    else:
+                        records, metadata = collect_pitb(client, now)
+                    with db:
+                        update_records(db, records, now, metadata['listingComplete'], source['key'])
                     state.update(metadata, status='connected', count=len(records), lastSuccessAt=iso_now())
                     connected += 1
             except Exception as error:

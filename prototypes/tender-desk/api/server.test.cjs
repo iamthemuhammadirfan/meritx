@@ -47,6 +47,11 @@ function request(url = '/api/tenders', { method = 'GET', headers = {} } = {}) {
 test('public projection excludes future private root, tender and nested fields', async () => {
   payload.companyProfiles = [{ secret: 'private-profile' }];
   payload.tenders[0].internalNote = 'private-note';
+  payload.tenders[0].advertisements = [{
+    label: 'Official advertisement copy', url: 'https://epms.ppra.gov.pk/pdf?file=abc',
+    sourceUrl: 'https://epms.ppra.gov.pk/public/tenders/tender-details/TS0000017278E',
+    reference: 'TS0000017278E', internalReviewer: 'private-reviewer',
+  }];
   payload.tenders[0].location.privateSiteCode = 'private-site';
   payload.tenders[0].documents = [{ label: 'Document', url: 'https://epads.gov.pk/doc', privateToken: 'private-token' }];
   await write();
@@ -54,6 +59,7 @@ test('public projection excludes future private root, tender and nested fields',
   assert.equal(response.status, 200);
   assert.equal(response.body.includes('private-'), false);
   assert.equal(response.json().tenders[0].title, 'Laptops in Lahore');
+  assert.equal(response.json().tenders[0].advertisements[0].reference, 'TS0000017278E');
   assert.equal(response.json().stale, false);
 });
 
