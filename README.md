@@ -23,7 +23,7 @@ npm run preview
 
 The output is in `out/`. `npm run preview` serves the static pages locally. Next.js development and static preview **do not execute PHP**, so the form backend must be verified with a PHP runtime. On an ordinary static-only host, replace the endpoint with an appropriate form service before publishing.
 
-The GitHub workflow installs from the lockfile, lints, typechecks and builds with indexing disabled. ESLint 9 is retained for compatibility with the Next.js React/accessibility plugins. The targeted minimatch override uses the patched 11.x release in the TypeScript parser.
+The GitHub workflow installs from the lockfile, lints, typechecks and tests release handling. Development and pull-request builds have indexing disabled. Successful pushes to `main` build with indexing enabled and automatically deploy to Spaceship. ESLint 9 is retained for compatibility with the Next.js React/accessibility plugins. The targeted minimatch override uses the patched 11.x release in the TypeScript parser.
 
 ## Pages and content
 
@@ -58,7 +58,9 @@ Backend validation was exercised in a separate private QA directory with email s
 
 Build with `NEXT_PUBLIC_SITE_URL=https://meritxsc.com` and `SITE_INDEXABLE=true`. Upload **only the contents of `out/`**, including `.htaccess` and `api/enquiry.php`, into the domain's document root. Do not upload source, `.env`, `.codex/`, `node_modules`, documentation or Git history.
 
-The production build is packaged, checksum-verified and transferred through the project-scoped Spaceship MCP connection. Snapshot the current site first, stage the new files outside the web folder, and replace the document root only after validating the staged release. Keep the previous release for rollback. The private enquiry directory stays outside the replaced website folder.
+Work on `development` and release through a pull request from `development` to `main`. After validation passes, GitHub Actions transfers the static build over a dedicated restricted SSH connection, verifies its checksum and staged files, and atomically replaces the live site. Public health checks automatically restore the old site on failure. The previous successful release stays outside the web folder for rollback. The private enquiry directory and separate tender subdomain are untouched.
+
+Use the **Roll back Spaceship** GitHub workflow on `main` to restore the previous release. Full workflow, key maintenance and rollback instructions are in `docs/deployment.txt`. The project-scoped MCP connection remains available for hosting administration; automated releases do not use its expiring token.
 
 `public/.htaccess` enforces the HTTPS apex hostname, disables directory listing, defines the custom 404 page and configures compression plus immutable caching for fingerprinted assets. Page metadata is centralised in `src/lib/metadata.ts`; the sitemap includes all public pages. Preview builds should use `SITE_INDEXABLE=false`.
 
