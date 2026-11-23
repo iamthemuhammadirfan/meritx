@@ -1,0 +1,179 @@
+MERITX AUTOMATIC NEWSPAPER PILOT — PREPARED ON DEVELOPMENT
+23 November 2026
+
+Deployment state
+
+The new team login and newspaper worker are implemented and locally verified.
+They are not deployed, scheduled, or started as a production seven-day pilot.
+The local smoke run is isolated under .private/newspaper-pilot-smoke and must
+not be copied over the production database. Its start date is test data.
+The Spaceship/MeritX MCP returned Authentication required during preparation;
+the host's Tesseract availability and worker capacity remain unverified.
+Follow AGENTS.md: production needs an explicit release request, a development
+to main pull request, and a passing validate check before deployment.
+
+Scope and costs
+
+No uploads, supplier subscription, hosted OCR, paid AI API, paid proxy, or model
+training. Python fetches dated publisher pages directly with verified HTTPS,
+crawler-policy checks, one-second pacing (or the publisher's longer delay),
+allowlisted redirects and bounded downloads. No paywall, login or CAPTCHA bypass.
+Publisher access conditions still apply; internal use does not grant blanket
+permission. Do not add sources that require circumvention.
+
+Three newspapers, five coverage groups:
+- Dawn: national/business pages plus Lahore and Islamabad metro pages. Other
+  metro editions are excluded; this is not complete Dawn coverage.
+- Jang: Lahore and Rawalpindi printed editions.
+- Express: Lahore and Islamabad printed editions.
+An Islamabad/Rawalpindi edition is a discovery source for federal notices,
+not evidence that every notice is federal or that delivery is in that city.
+
+Team access must be live first
+
+Node uses individual accounts with scrypt password hashes, single-use 48-hour
+invitations and opaque eight-hour sessions. Session digests, throttles, account
+roles and invitation digests persist in a private JSON store. Passwords require
+at least 12 characters. Account reset and disable revoke sessions; logging out
+revokes the current session. Only an administrator can invite/reset/disable
+others. A member cannot manage access, and the last administrator cannot be
+disabled or downgraded. Self-reset through the team screen is blocked to avoid
+losing the only administrator's activation link. There is no public signup and
+no invitation email is sent. The administrator shares links through their own
+channel. An account has one active session at a time during this pilot.
+
+This file store supports ONE Node application process. Do not scale Passenger
+to concurrent independent workers using the same team file. Bootstrap the
+administrator before starting the process; use the team screen afterward.
+For multi-process hosting, move credentials/sessions to a shared transactional
+store before increasing instances. Back up team.json privately with its 0600
+permissions. Offline account-owner recovery uses team.cjs invite-admin.
+
+Required environment variables on the Node application:
+  MERITX_PUBLIC_ORIGIN=https://tenders.meritxsc.com
+  MERITX_TEAM_PATH=/home/rhjnctqjdv/.meritx-tender-engine/team.json
+  MERITX_FEED_PATH=/home/rhjnctqjdv/.meritx-tender-engine/data/feed.json
+  MERITX_ALLOWED_HOSTS=tenders.meritxsc.com,localhost,127.0.0.1
+  NODE_ENV=production
+
+The team file is 0600 in a 0700 private directory outside all document roots.
+An absent, malformed or overly readable store fails closed. No password or
+activation link belongs in Git, screenshots, deployment logs or shared files.
+Use the administrator's confirmed email; no real accounts were invented.
+
+From an account-owned terminal, before launching the new app:
+  node team.cjs init-admin ADMIN_EMAIL ADMIN_NAME
+This prints one private activation link. The actual administrator opens it and
+sets their password. Use invite-admin only for an existing store's offline
+recovery. Never run init-admin against an existing store to reset it.
+
+Stage auth.cjs and server.cjs under api/, app.cjs, package.json, index.html,
+login.html, team.html and assets/ outside the web document root. Keep the
+existing Node 22 app mapping, DNS and HTTPS. Restart the actual account-owned
+process and verify that sessions survive a process restart.
+
+Before enabling any newspaper collection, verify public HTTPS:
+- / redirects anonymously to /login.
+- /api/tenders and /api/evidence/<id>.png return 401 anonymously.
+- Authenticated users can read notices; members cannot read /api/team.
+- Invitation acceptance, ordinary sign-in and sign-out work.
+- /healthz is intentionally public and contains no catalog or account data.
+- Private source paths, credential paths, source code and old PHP routes are
+  not served. The main-domain /tenders/ route remains retired.
+The start command refuses to begin if the site's anonymous API returns 200.
+
+Free OCR and collection worker
+
+Keep collection outside API requests and outside the document root. Use the
+same private data directory and collector.lock as the official worker; overlaps
+skip without modifying either job's database. Do not copy a local SQLite file
+over production. The official worker can publish the same combined snapshot.
+
+Check command -v tesseract and its version on the actual worker host first.
+Install only free tools. On a managed Linux host with package privileges,
+tesseract-ocr is the system package; macOS uses Homebrew tesseract. Shared
+Spaceship hosting may not allow installation of a system executable. A Python
+package alone does not install Tesseract. Do not enable production scheduling
+until a working host is verified. If necessary, an existing office computer
+can do OCR, but unattended uptime and secure automatic publication need to be
+implemented and verified before calling that a live solution. No new paid host
+is authorized for this pilot.
+
+Within the private Python environment:
+  pip install -r newspaper-requirements.txt
+  python prepare_ocr.py --tessdata /PRIVATE_ENGINE/tessdata
+prepare_ocr.py downloads only pinned free Tesseract English and Urdu language
+files from the official repository, validates SHA-256 hashes and reuses valid
+existing files. It makes no AI API call. The language files are Apache 2.0 data;
+their source commit is recorded in prepare_ocr.py. Models are not Git assets.
+
+After live login, host readiness and bootstrap are verified, run once:
+  python newspaper_pilot.py --data-dir /PRIVATE_ENGINE/data --tessdata /PRIVATE_ENGINE/tessdata --start
+The private database starts a seven-calendar-day window on that actual PKT
+date; --start never resets an existing pilot. Do not transfer the smoke DB.
+
+Then register automatic checks at 07:00, 09:00 and 12:00 Asia/Karachi each day:
+  python newspaper_pilot.py --data-dir /PRIVATE_ENGINE/data --tessdata /PRIVATE_ENGINE/tessdata
+Use absolute paths to the private environment's Python and script in hosting.
+Configure the scheduler timezone explicitly; these correspond to 02:00, 04:00
+and 07:00 UTC on a UTC cron host. Preserve the separate 06:00 PKT official job.
+Use a 20-minute outer job limit and a private log with bounded retention.
+The worker normally has a 15-minute total budget, a fair budget per edition,
+up to 48 pages per group, 600 requests and 300 MB downloaded per run. Model OCR
+has a 60-second per-image timeout, one CPU thread and image pixel limits. Later
+checks reuse OCR results. Express menus are deduplicated by printed page, so
+different View parameters do not double-count pages. Missed-day recovery uses
+--date YYYY-MM-DD only within the existing pilot window. End-of-window calls
+stop newspaper network collection automatically. Remove the cron job after
+reviewing the final report; it cannot silently begin a new seven-day window.
+
+Results and limitations
+
+Every collected page must match the requested publication date and edition.
+Mapped clipping images are processed for Dawn and Jang, plus a full-page OCR
+fallback. Express currently uses full-page OCR. A fallback can contain several
+notices in one candidate; this is explicit unverified discovery, not a claim
+that all tenders were separated correctly. Small or damaged Urdu ads can be
+missed. Truncated publisher JPEGs can be decoded for review but flag coverage
+partial. Run limits, failed page checks and failed clipping checks also remain
+partial rather than reporting zero opportunities or complete coverage.
+
+Source metadata, seven dated coverage rows, expected/fetched/processed page
+counts and candidate counts are shown in Sources. Some days can be partial;
+processing every page does not measure advertisement recall. No manual paper
+upload is needed. Staff can inspect uncertain extracted text and private OCR
+images in Newspaper review. Dates from OCR are never installed as submission
+deadlines. Company eligibility remains unassessed. A city mentioned in the ad
+is labeled separately from verified delivery location. Newspaper references
+are not used to merge records with official tenders until verified. Identical
+image candidates deduplicate within a page, but cross-paper duplicates can
+remain during the pilot to avoid false merges. Revisions keep their evidence.
+
+The feed and evidence need authenticated, private/no-store responses. Assets
+contain no account secrets or catalog records. Evidence is only reachable by
+authenticated fixed-hash routes, never arbitrary paths. Raw data, OCR cache,
+SQLite and images live outside every document root. Evidence has a 512 MB
+ceiling and a 12 MB per-image ceiling; hitting either reports partial coverage.
+Inspect size after the pilot, back up deliberately and remove test artifacts
+according to retention needs. No unlimited archive or paid storage is assumed.
+
+Local validation evidence, 23 November 2026
+
+- Bounded live smoke: all three papers/five groups reached, 23 pages processed,
+  eight tender candidates found. All groups accurately reported partial under
+  the five-minute smoke budget; complete-edition coverage is not established.
+- An IT hardware/server procurement and an IT equipment line were detected.
+- Website submission boilerplate and Software Technology Park address lines
+  are excluded from newspaper software matches. Urdu keyword checks included.
+- API tests cover access control, cookie attributes, CSRF/origin rejection,
+  invitation expiry/replay, session restart/expiry/logout, account disable/reset,
+  throttle persistence, protected images, private caching and fail-closed state.
+- Parser tests cover edition/date isolation, repeated page links, crawler and
+  image restrictions, unknown OCR deadlines, missing editions and pilot end.
+- Browser preview verified sign-in, Sources, team screen and sign-out.
+
+Release only after the repository's validate check passes. The tender app is
+separate from the marketing-site deployment and needs its own staged cutover.
+Back up both private databases and the current app release before switching.
+If reverting app code, keep newspaper data private; never restore the previous
+public catalog API against the new combined newspaper snapshot.

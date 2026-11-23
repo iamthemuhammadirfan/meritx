@@ -4,5 +4,5 @@
   "private": true,
   "type": "commonjs",
   "engines": { "node": ">=22" },
-  "scripts": { "start": "node app.cjs", "test": "node --test api/server.test.cjs" }
+  "scripts": { "start": "node app.cjs", "test": "node --test api/*.test.cjs" }
 }

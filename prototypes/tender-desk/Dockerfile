@@ -1,9 +1,9 @@
 FROM node:22-bookworm-slim
-ENV NODE_ENV=production HOST=0.0.0.0 PORT=8080 MERITX_FEED_PATH=/data/feed.json
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=8080 MERITX_FEED_PATH=/data/feed.json MERITX_TEAM_PATH=/private/team.json
 WORKDIR /app
-COPY api/server.cjs /app/api/server.cjs
+COPY api/server.cjs api/auth.cjs /app/api/
 COPY app.cjs package.json /app/
-COPY index.html /app/index.html
+COPY index.html login.html team.html /app/
 COPY assets/ /app/assets/
 USER node
 EXPOSE 8080

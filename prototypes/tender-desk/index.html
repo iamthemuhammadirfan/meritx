@@ -11,6 +11,7 @@
 :root{color-scheme:light dark}body{margin:0;background:light-dark(#f3f6fa,#0c1b2a)}
 #meritx-desk{max-width:1600px;margin:0 auto;border:0;border-radius:0;min-height:100vh}
 button,a,summary,.cursor-interaction{cursor:pointer}
+#meritx-desk .mx-account{display:flex;align-items:center;gap:10px;font-size:14px}#meritx-desk .mx-account button{background:transparent;border:1px solid var(--mx-line);border-radius:6px;padding:6px 10px}#meritx-desk #mx-team-link{color:var(--mx-rail-text);font-size:14px;padding:10px 12px}#meritx-desk .mx-pilot{padding:18px 0;border-bottom:1px solid var(--mx-line)}#meritx-desk .mx-pilot-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}#meritx-desk .mx-pilot-days p{font-size:14px}
 </style>
 <script src="./assets/lucide-0.468.0.min.js"></script>
 
@@ -228,7 +229,9 @@ button,a,summary,.cursor-interaction{cursor:pointer}
         <button class="cursor-interaction" data-view="changes"><i data-lucide="bell" aria-hidden="true"></i>Changes<span class="mx-nav-count" id="mx-changes-count">0</span></button>
         <div class="mx-nav-label">Workspace</div>
         <button class="cursor-interaction" data-view="sources"><i data-lucide="radio" aria-hidden="true"></i>Sources</button>
+        <button class="cursor-interaction" data-view="review"><i data-lucide="newspaper" aria-hidden="true"></i>Newspaper review</button>
         <button class="cursor-interaction" data-view="profile"><i data-lucide="building-2" aria-hidden="true"></i>Company profile</button>
+        <a href="/team" id="mx-team-link" hidden>Team access</a>
       </nav>
       <div class="mx-sidebar-bottom"><strong>Built around your reach.</strong><p>Lahore first.<br>Punjab &amp; federal next.<br>Pakistan as we grow.</p></div>
     </aside>
@@ -236,6 +239,7 @@ button,a,summary,.cursor-interaction{cursor:pointer}
       <header class="mx-topbar">
         <div class="mx-breadcrumb"><i data-lucide="panel-left" aria-hidden="true"></i>MeritX workspace <span>/</span><b>Tender desk</b></div>
         <span class="mx-demo" id="mx-feed-badge">Loading official notices…</span>
+        <div class="mx-account"><span id="mx-account"></span><button type="button" id="mx-logout">Sign out</button></div>
       </header>
       <main class="mx-content">
         <div class="mx-heading">
@@ -268,6 +272,7 @@ button,a,summary,.cursor-interaction{cursor:pointer}
         </div>
         <section id="mx-sources-view" class="mx-panel" hidden aria-label="Tender sources">
           <h2>Know your source coverage.</h2><p>Federal EPADS and selected official Punjab sources. Each source shows its own freshness and connection status.</p>
+          <div id="mx-pilot" class="mx-pilot" hidden></div>
           <div id="mx-source-list"></div>
         </section>
         <section id="mx-profile-view" class="mx-panel" hidden aria-label="Company profile deferred">
@@ -279,7 +284,7 @@ button,a,summary,.cursor-interaction{cursor:pointer}
     </div>
   </div>
 </div>
-<script src="./assets/dashboard.js" defer></script>
+<script src="./assets/dashboard.js?v=team-pilot-1" defer></script>
 
 </body>
 </html>

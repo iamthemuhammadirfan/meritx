@@ -2,6 +2,8 @@
 
 Live at **https://tenders.meritxsc.com/**. Official notices replaced the fictional prototype on 17 November 2026. The main-domain `/tenders` and `/tenders/` routes remain retired and return 404.
 
+**Prepared on development, not deployed:** individual team login and an automatic seven-day Dawn/Jang/Express newspaper pilot. No uploads, paid subscriptions or AI APIs. See [the pilot runbook](../../docs/tender-newspaper-pilot.txt) for provisioning, access checks, free OCR setup, scheduling and the measured limitations. The deployed release described below remains unchanged until the required production release. The new API fails closed without its private team store; its catalog and evidence require sign-in. Use `node --test api/*.test.cjs` for all API/access tests and install `engine/newspaper-requirements.txt` for the newspaper parser suite.
+
 ## Coverage and matching
 
 The daily collector also checks Federal PPRA's public tender listings and selects up to 120 active detail pages, prioritizing Lahore and MeritX service keywords. Official advertisement PDFs are linked from the issuing agency's PPRA record. These can include newspaper clippings and publication-ready ad copies. The dashboard's advertisement filter shows this evidence. Exact EPADS references are merged when deadlines agree. Conflicting deadlines keep both records and display a warning. Failed checks retain previously collected evidence.

@@ -99,6 +99,26 @@ def infer_location(title, buyer):
     return {'city': 'Location not stated', 'basis': 'unknown'}
 
 
+def classify_newspaper(text):
+    """Do not mistake a notice's submission website for website-development work."""
+    matches = {}
+    for line in text.splitlines():
+        for match in classify(line):
+            if match['category'] == 'Software' and re.search(r'\bsoftware\s+(?:technology\s+park|export\s+board)\b', line, re.I):
+                continue  # A buyer's postal address does not establish scope.
+            if match['category'] == 'Software' and re.search(r'web|portal|dashboard', match['keyword'], re.I):
+                if not re.search(r'\b(?:develop\w*|design\w*|maintain\w*|maintenance|upgrade\w*|hosting|implementation)\b', line, re.I):
+                    continue
+            matches.setdefault(match['category'], match)
+    urdu = {'IT equipment': r'کمپیوٹر|پرنٹر|لیپ ٹاپ', 'Networking': r'نیٹ ورک',
+            'CCTV': r'سی سی ٹی وی', 'Software': r'سافٹ ویئر', 'IT support': r'آئی ٹی سپورٹ'}
+    for category, expression in urdu.items():
+        match = re.search(expression, text)
+        if match:
+            matches.setdefault(category, {'category': category, 'keyword': match[0]})
+    return list(matches.values())
+
+
 def safe_url(url):
     parsed = urlsplit(url)
     if parsed.scheme != 'https' or parsed.hostname not in ALLOWED_HOSTS or parsed.username or parsed.password or parsed.port not in (None, 443):
@@ -311,7 +331,7 @@ def update_records(db, records, now, complete=False, source_key=None):
                 db.execute('INSERT INTO changes(notice_id,recorded_at,fields) VALUES(?,?,?)', (record['id'], now, json.dumps(fields)))
         record['firstSeenAt'] = first_seen
         record['lastSeenAt'] = now
-        record['matches'] = classify(record['title'])
+        record['matches'] = classify_newspaper(record['title'] + '\n' + record.get('ocrText', '')) if record.get('newspaper') else classify(record['title'])
         record['eligibility'] = 'Not assessed — company details not added'
         record['documents'] = record.get('documents', [])
         db.execute('INSERT INTO notices(id,source_key,payload,first_seen,last_seen,listed) VALUES(?,?,?,?,?,1) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,last_seen=excluded.last_seen,listed=1',
@@ -517,6 +537,29 @@ def publish_feed(db, data_dir, now):
             'schedule': {'time': '06:00', 'timezone': 'Asia/Karachi', 'frequency': 'daily'},
             'coverageNote': 'Federal EPADS, selected Punjab notices and selected official advertisement copies. Full newspaper edition coverage is pending.',
             'sources': sources, 'tenders': tenders}
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='newspaper_pilot'").fetchone():
+        pilot = db.execute('SELECT start_date FROM newspaper_pilot WHERE id=1').fetchone()
+        if pilot:
+            start = datetime.fromisoformat(pilot['start_date']).date()
+            today = datetime.fromisoformat(now).astimezone(PKT).date()
+            daily = {}
+            for row in db.execute('SELECT day,payload FROM newspaper_daily'):
+                daily.setdefault(row['day'], []).append(json.loads(row['payload']))
+            days = []
+            for index in range(7):
+                day = (start + timedelta(days=index)).isoformat()
+                editions = daily.get(day, [])
+                days.append({'date': day, 'expectedEditions': 5,
+                             'completeEditions': sum(item['status'] == 'connected' for item in editions),
+                             'partialEditions': sum(item['status'] == 'partial' for item in editions),
+                             'unavailableEditions': sum(item['status'] == 'unavailable' for item in editions) + (5 - len(editions) if day <= today.isoformat() else 0),
+                             'candidates': sum(item['count'] for item in editions),
+                             'pagesProcessed': sum(item['pagesProcessed'] for item in editions)})
+            feed['pilot'] = {'startDate': start.isoformat(), 'endDate': (start + timedelta(days=6)).isoformat(),
+                             'status': 'complete' if today > start + timedelta(days=6) else 'running',
+                             'daysCollected': len(daily), 'daysExpected': 7, 'days': days,
+                             'coverageNote': 'Three newspapers: Dawn national/Lahore/Islamabad pages, Jang Lahore/Rawalpindi and Express Lahore/Islamabad. Free local OCR; no uploads. Processing counts are not a guarantee that every ad was detected.'}
+            feed['coverageNote'] = 'Official sources plus a three-newspaper automatic pilot. Newspaper candidates are unverified; see Sources for dated edition coverage.'
     atomic_write(data_dir / 'feed.json', json.dumps(feed, ensure_ascii=False, separators=(',', ':')))
     return feed
 

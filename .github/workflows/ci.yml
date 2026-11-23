@@ -28,10 +28,12 @@ jobs:
       - name: Validate tender API and collector
         run: |
           python3 -m venv /tmp/meritx-tender-tests
-          /tmp/meritx-tender-tests/bin/pip install -r prototypes/tender-desk/engine/requirements.txt
-          node --test prototypes/tender-desk/api/server.test.cjs
+          /tmp/meritx-tender-tests/bin/pip install -r prototypes/tender-desk/engine/newspaper-requirements.txt
+          node --test prototypes/tender-desk/api/*.test.cjs
           /tmp/meritx-tender-tests/bin/python -m unittest discover -s prototypes/tender-desk/engine -p 'test_*.py' -v
           node --check prototypes/tender-desk/assets/dashboard.js
+          node --check prototypes/tender-desk/assets/login.js
+          node --check prototypes/tender-desk/assets/team.js
       - run: npm run build
         env:
           NEXT_PUBLIC_SITE_URL: https://meritxsc.com

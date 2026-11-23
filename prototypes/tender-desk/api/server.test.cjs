@@ -6,8 +6,9 @@ const path = require('node:path');
 const http = require('node:http');
 const { gunzipSync } = require('node:zlib');
 const { createServer, MAX_FEED_BYTES } = require('./server.cjs');
+const { TeamStore } = require('./auth.cjs');
 
-let directory, filename, payload, server, port, now;
+let directory, filename, payload, server, port, now, team, cookie;
 const write = () => fs.writeFile(filename, JSON.stringify(payload));
 
 beforeEach(async () => {
@@ -20,7 +21,12 @@ beforeEach(async () => {
     tenders: [{ id: 'EPADS-P1', title: 'Laptops in Lahore', documents: [], matches: [],
       location: { city: 'Lahore', basis: 'title' }, changes: [] }] };
   await write();
-  server = createServer({ snapshot: filename, clock: () => now, logError: () => {} });
+  team = new TeamStore(path.join(directory, 'team.json'), () => now);
+  await team.initialize();
+  const invite = await team.invite('admin@example.com', 'Test administrator', 'admin');
+  const login = await team.activate(invite.token, 'test-password-123456', 'local-test');
+  cookie = `__Host-meritx_session=${login.secret}`;
+  server = createServer({ snapshot: filename, team, clock: () => now, logError: () => {} });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   port = server.address().port;
 });
@@ -32,7 +38,7 @@ afterEach(async () => {
 
 function request(url = '/api/tenders', { method = 'GET', headers = {} } = {}) {
   return new Promise((resolve, reject) => {
-    const req = http.request({ host: '127.0.0.1', port, path: url, method, headers, agent: false }, res => {
+    const req = http.request({ host: '127.0.0.1', port, path: url, method, headers: { Cookie: cookie, ...headers }, agent: false }, res => {
       const chunks = [];
       res.on('data', chunk => chunks.push(chunk));
       res.on('end', () => resolve({ status: res.statusCode, headers: res.headers,
@@ -71,7 +77,8 @@ test('gzip and identity share a weak semantic validator and have correct wire le
   assert.deepEqual(JSON.parse(gunzipSync(gzip.body)), identity.json());
   assert.equal(gzip.headers.etag, identity.headers.etag);
   assert.match(identity.headers.etag, /^W\/"[a-f0-9]{64}"$/);
-  assert.equal(gzip.headers.vary, 'Accept-Encoding');
+  assert.equal(gzip.headers.vary, 'Accept-Encoding, Cookie');
+  assert.equal(gzip.headers['cache-control'], 'private, no-store');
   assert.equal(Number(gzip.headers['content-length']), gzip.body.length);
   assert.equal(Number(identity.headers['content-length']), identity.body.length);
 });
@@ -112,10 +119,20 @@ test('atomic replacement invalidates cache with the same file size and timestamp
 test('stale transition updates cached data without a file write', async () => {
   const first = await request();
   now += 37 * 3600 * 1000;
+  const login = await team.login('admin@example.com', 'test-password-123456', 'local-test');
+  cookie = `__Host-meritx_session=${login.secret}`;
   const later = await request();
   assert.equal(later.json().stale, true);
   assert.notEqual(later.headers.etag, first.headers.etag);
   assert.equal((await request('/readyz')).json().status, 'stale');
+});
+
+test('a fresh newspaper publication does not hide overdue official collection', async () => {
+  payload.sources[0].lastSuccessAt = new Date(now - 40 * 3600_000).toISOString();
+  await write();
+  const response = await request();
+  assert.equal(response.json().stale, true);
+  assert.equal(response.json().sources[0].status, 'stale');
 });
 
 test('missing, corrupt, oversized, malformed and timezone-free feeds fail without path leaks', async () => {
@@ -153,7 +170,7 @@ test('an asset symlink cannot serve files from outside the assets directory', as
   await fs.writeFile(path.join(directory, 'private.txt'), 'private-secret');
   await fs.symlink(path.join(directory, 'private.txt'), path.join(frontend, 'assets', 'leak.txt'));
   await new Promise(resolve => server.close(resolve));
-  server = createServer({ snapshot: filename, frontend, logError: () => {} });
+  server = createServer({ snapshot: filename, frontend, team, clock: () => now, logError: () => {} });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   port = server.address().port;
   assert.equal((await request('/assets/leak.txt')).status, 404);
