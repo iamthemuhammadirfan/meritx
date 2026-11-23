@@ -1,20 +1,23 @@
-// Read-only public catalog API. Collection runs in the separate Python worker.
+// Team-only catalog. Collection runs in the separate Python worker.
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
 const { createHash } = require('node:crypto');
 const { gzipSync } = require('node:zlib');
+const { TeamStore, AuthError, SESSION_MS } = require('./auth.cjs');
 
 const MAX_FEED_BYTES = 12_000_000;
 const MAX_AGE_MS = 36 * 3600 * 1000;
 const SOURCE_FIELDS = ['key', 'name', 'region', 'url', 'coverage', 'lastAttemptAt',
   'lastSuccessAt', 'pagesChecked', 'detailErrors', 'detailsChecked',
-  'detailLimitReached', 'listingComplete', 'status', 'count', 'error'];
+  'detailLimitReached', 'listingComplete', 'status', 'count', 'error', 'publicationDate',
+  'edition', 'pagesExpected', 'pagesFetched', 'pagesProcessed', 'candidateCount', 'reviewCount'];
 const TENDER_FIELDS = ['id', 'reference', 'sourceKey', 'title', 'buyer', 'region',
   'sourceUrl', 'publishedAt', 'closingAt', 'datePrecision', 'procurementType',
   'amendmentFlag', 'detailUrl', 'detailVerifiedAt', 'deadlineWarning', 'detailWarning',
-  'deadlineBasis', 'firstSeenAt', 'lastSeenAt', 'eligibility', 'listed', 'sourceName', 'sourceStatus'];
+  'deadlineBasis', 'firstSeenAt', 'lastSeenAt', 'eligibility', 'listed', 'sourceName', 'sourceStatus',
+  'reviewStatus', 'newspaper', 'edition', 'page', 'ocrText', 'evidenceId'];
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Robots-Tag': 'noindex, nofollow, noarchive',
@@ -30,6 +33,8 @@ function publicFeed(data) {
       ![...data.sources, ...data.tenders].every(isObject)) throw new Error('Invalid snapshot');
   return {
     ...pick(data, ['schemaVersion', 'generatedAt', 'coverageNote']),
+    ...(isObject(data.pilot) ? { pilot: { ...pick(data.pilot, ['startDate', 'endDate', 'status', 'daysCollected', 'daysExpected', 'coverageNote']),
+      days: (data.pilot.days ?? []).filter(isObject).map(day => pick(day, ['date', 'expectedEditions', 'completeEditions', 'partialEditions', 'unavailableEditions', 'candidates', 'pagesProcessed'])) } } : {}),
     schedule: pick(data.schedule, ['time', 'timezone', 'frequency']),
     sources: data.sources.map(source => pick(source, SOURCE_FIELDS)),
     tenders: data.tenders.map(item => ({
@@ -93,10 +98,16 @@ class SnapshotStore {
     // Concurrent requests share filesystem refresh work.
     this.loading ??= this.refresh().finally(() => { this.loading = null; });
     await this.loading;
-    const stale = this.clock() - this.generated > MAX_AGE_MS;
-    const key = `${stale}:${compressed}`;
+    // A newspaper refresh must not hide an overdue official-source collector.
+    const overdue = this.payload.sources.filter(source => !source.edition && source.status === 'connected' &&
+      source.lastSuccessAt && this.clock() - Date.parse(source.lastSuccessAt) > MAX_AGE_MS).map(source => source.key);
+    const stale = this.clock() - this.generated > MAX_AGE_MS || overdue.length > 0;
+    const key = `${stale}:${overdue.join(',')}:${compressed}`;
     if (!this.variants.has(key)) {
-      let body = Buffer.from(JSON.stringify({ ...this.payload, stale }));
+      let body = Buffer.from(JSON.stringify({ ...this.payload, stale,
+        sources: this.payload.sources.map(source => overdue.includes(source.key) ? { ...source, status: 'stale' } : source),
+        tenders: this.payload.tenders.map(tender => overdue.includes(tender.sourceKey) ? { ...tender, sourceStatus: 'stale' } : tender),
+      }));
       // LiteSpeed can decompress upstream gzip for identity clients. A weak
       // validator identifies equivalent JSON across those wire transformations.
       const etag = `W/"${createHash('sha256').update(body).digest('hex')}"`;
@@ -129,12 +140,20 @@ const CONTENT_TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javasc
 
 function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.homedir(), '.meritx-tender-engine/data/feed.json'),
   frontend = path.resolve(__dirname, '..'), clock = Date.now,
+  evidenceRoot = path.join(path.dirname(snapshot), 'newspapers/evidence'),
+  team = new TeamStore(process.env.MERITX_TEAM_PATH || path.join(os.homedir(), '.meritx-tender-engine/team.json'), clock),
+  publicOrigin = process.env.MERITX_PUBLIC_ORIGIN || 'https://tenders.meritxsc.com',
   allowedHosts = (process.env.MERITX_ALLOWED_HOSTS || 'tenders.meritxsc.com,localhost,127.0.0.1').split(',').map(host => host.trim().toLowerCase()),
   logError = () => console.warn('Tender snapshot unavailable'),
 } = {}) {
   const store = new SnapshotStore(snapshot, clock);
   const assets = path.join(frontend, 'assets');
-  return http.createServer(async (request, response) => {
+  const originUrl = new URL(publicOrigin);
+  if (originUrl.protocol !== 'https:' && !(originUrl.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(originUrl.hostname))) throw new Error('Team access requires HTTPS or a loopback preview');
+  const origin = originUrl.origin;
+  const cookieName = origin.startsWith('https:') ? '__Host-meritx_session' : 'meritx_session';
+  const cookie = (value, maxAge = SESSION_MS / 1000) => `${cookieName}=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${origin.startsWith('https:') ? '; Secure' : ''}`;
+  const server = http.createServer(async (request, response) => {
     const send = (status, body = '', headers = {}) => {
       const bytes = Buffer.isBuffer(body) ? body : Buffer.from(body);
       response.writeHead(status, { ...SECURITY_HEADERS, 'Cache-Control': 'no-store',
@@ -149,8 +168,71 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
       pathname = decodeURIComponent(request.url.split('?')[0]);
       if (!pathname.startsWith('/') || pathname.includes('\0') || pathname.includes('\\')) throw new Error('Invalid path');
     } catch { return send(400, 'Invalid path'); }
-    if (!['GET', 'HEAD'].includes(request.method)) return send(405, 'Method not allowed', { Allow: 'GET, HEAD' });
     if (pathname === '/healthz') return json(200, { status: 'ok' });
+    const authRoute = ['/api/auth/login', '/api/auth/activate', '/api/auth/logout', '/api/team/invite', '/api/team/disable'].includes(pathname);
+    if (!['GET', 'HEAD'].includes(request.method) && !(request.method === 'POST' && authRoute)) return send(405, 'Method not allowed', { Allow: authRoute ? 'POST' : 'GET, HEAD' });
+    const secret = (request.headers.cookie || '').split(';').map(part => part.trim()).find(part => part.startsWith(cookieName + '='))?.slice(cookieName.length + 1) || '';
+    const publicFile = ['/login', '/activate'].includes(pathname);
+    let session;
+    try {
+      if (pathname.startsWith('/api/') && request.method === 'POST') {
+        if (request.headers.origin !== origin || request.headers['content-type']?.split(';')[0] !== 'application/json') return json(403, { error: 'Reload this page and try again.' });
+        let size = 0, chunks = [];
+        for await (const chunk of request) {
+          size += chunk.length;
+          if (size > 4096) return json(413, { error: 'Request is too large.' });
+          chunks.push(chunk);
+        }
+        let input;
+        try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!isObject(input)) throw new Error(); }
+        catch { return json(400, { error: 'Enter valid account details.' }); }
+        if (pathname === '/api/auth/login' || pathname === '/api/auth/activate') {
+          const remote = request.socket.remoteAddress || 'unknown'; // Never trust arbitrary forwarded IP headers.
+          const result = pathname.endsWith('/login') ? await team.login(input.email, input.password, remote) : await team.activate(input.token, input.password, remote);
+          return json(200, { user: result.user, csrf: result.csrf }, { 'Set-Cookie': cookie(result.secret) });
+        }
+        session = await team.authenticate(secret);
+        if (!session) return json(401, { error: 'Please sign in.' });
+        if (request.headers['x-csrf-token'] !== session.csrf) return json(403, { error: 'Reload this page and try again.' });
+        if (pathname === '/api/auth/logout') {
+          await team.logout(secret);
+          return json(200, { status: 'signed-out' }, { 'Set-Cookie': cookie('', 0) });
+        }
+        if (session.user.role !== 'admin') return json(403, { error: 'Administrator access is required.' });
+        if (pathname === '/api/team/invite') {
+          if (typeof input.email === 'string' && input.email.trim().toLowerCase() === session.user.email) return json(400, { error: 'Ask another administrator to reset your access. This screen cannot reset your own account.' });
+          const result = await team.invite(input.email, input.name, input.role);
+          return json(201, { user: result.user, expiresAt: result.expiresAt, activationUrl: `${origin}/activate#${result.token}` });
+        }
+        await team.disable(input.id);
+        return json(200, { status: 'disabled' });
+      }
+      if (!publicFile && !pathname.startsWith('/assets/')) {
+        session = await team.authenticate(secret);
+        if (!session) return pathname === '/' || pathname === '/team' ? send(302, '', { Location: '/login' }) : json(401, { error: 'Please sign in.' });
+      }
+      if (pathname === '/api/auth/session') return json(200, session);
+      if (/^\/api\/evidence\/[a-f0-9]{64}\.png$/.test(pathname)) {
+        try {
+          const root = await fs.realpath(evidenceRoot);
+          const filename = await fs.realpath(path.join(root, path.basename(pathname)));
+          if (!filename.startsWith(root + path.sep)) return send(404, 'Not found');
+          const file = await fs.open(filename, 'r');
+          try {
+            const stat = await file.stat();
+            if (!stat.isFile() || stat.size > MAX_FEED_BYTES) return send(404, 'Not found');
+            return send(200, await file.readFile(), { 'Content-Type': 'image/png', 'Content-Disposition': 'inline', 'Cache-Control': 'private, no-store' });
+          } finally { await file.close(); }
+        } catch { return send(404, 'Not found'); }
+      }
+      if (pathname === '/api/team') {
+        if (session.user.role !== 'admin') return json(403, { error: 'Administrator access is required.' });
+        return json(200, { users: await team.list() });
+      }
+      if (pathname === '/team' && session.user.role !== 'admin') return send(403, 'Administrator access is required.');
+    } catch (error) {
+      return json(error instanceof AuthError ? error.status : 503, { error: error instanceof AuthError ? error.message : 'Team access is temporarily unavailable. Please try again shortly.' });
+    }
     if (pathname === '/api/tenders' || pathname === '/readyz') {
       const accept = request.headers['accept-encoding'] || '';
       const compressed = pathname === '/api/tenders' && quality(accept, 'gzip') > 0;
@@ -158,7 +240,7 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
       try {
         const representation = await store.read(compressed);
         if (pathname === '/readyz') return json(200, { status: representation.stale ? 'stale' : 'ready', stale: representation.stale });
-        const headers = { ETag: representation.etag, Vary: 'Accept-Encoding', 'Cache-Control': 'public, max-age=60, must-revalidate',
+        const headers = { ETag: representation.etag, Vary: 'Accept-Encoding, Cookie', 'Cache-Control': 'private, no-store',
           ...(compressed ? { 'Content-Encoding': 'gzip' } : {}) };
         if (etagMatches(request.headers['if-none-match'] || '', representation.etag)) return send(304, '', headers);
         return send(200, representation.body, { ...headers, 'Content-Type': 'application/json; charset=utf-8' });
@@ -170,6 +252,8 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
     // No generic repository file server. Resolve symlinks before checking assets.
     let filename;
     if (pathname === '/') filename = path.join(frontend, 'index.html');
+    else if (publicFile) filename = path.join(frontend, 'login.html');
+    else if (pathname === '/team') filename = path.join(frontend, 'team.html');
     else if (pathname.startsWith('/assets/') && !pathname.split('/').some(part => part.startsWith('.'))) {
       try {
         const root = await fs.realpath(assets);
@@ -181,9 +265,13 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
     try {
       const body = await fs.readFile(filename);
       return send(200, body, { 'Content-Type': CONTENT_TYPES[path.extname(filename)] || 'application/octet-stream',
-        'Cache-Control': pathname === '/' ? 'no-cache, must-revalidate' : 'public, max-age=3600' });
+        'Cache-Control': pathname.startsWith('/assets/') ? 'public, max-age=3600' : 'private, no-store' });
     } catch { return send(404, 'Not found'); }
   });
+  server.requestTimeout = 15000;
+  server.headersTimeout = 10000;
+  server.maxHeadersCount = 60;
+  return server;
 }
 
 module.exports = { createServer, MAX_FEED_BYTES };

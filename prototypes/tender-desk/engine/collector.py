@@ -11,6 +11,7 @@ import fcntl
 import hashlib
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import re
@@ -25,6 +26,7 @@ from zoneinfo import ZoneInfo
 from bs4 import BeautifulSoup
 
 PKT = ZoneInfo('Asia/Karachi')
+OFFICIAL_RUN_HOUR = 6
 AGENT = 'MeritXTenderDesk/1.0 (+https://tenders.meritxsc.com/)'
 ALLOWED_HOSTS = {'epads.gov.pk', 'www.epads.gov.pk', 'pa.epads.gov.pk',
                  'pitb.gov.pk', 'www.pitb.gov.pk', 'eproc.punjab.gov.pk', 'ep.punjab.gov.pk',
@@ -63,6 +65,21 @@ def iso_now():
     return datetime.now(PKT).isoformat(timespec='seconds')
 
 
+def scheduled_hour(hours, now=None):
+    # Native cron wakes hourly in the host timezone. Collection follows PKT,
+    # including when the host transitions between standard and daylight time.
+    return (now or datetime.now(PKT)).astimezone(PKT).hour in hours
+
+
+def configure_logging(log_file=None):
+    options = {}
+    if log_file is not None:
+        os.umask(0o077)
+        log_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        options['handlers'] = [RotatingFileHandler(log_file, maxBytes=512_000, backupCount=2, encoding='utf-8')]
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', **options)
+
+
 def parse_date(value):
     value = clean(value)
     for pattern in ('%A, %B %d, %Y %I:%M %p', '%b %d, %Y', '%B %d, %Y', '%Y-%m-%d'):
@@ -97,6 +114,26 @@ def infer_location(title, buyer):
         if len(found) > 1:
             return {'city': 'Multiple locations', 'basis': basis}
     return {'city': 'Location not stated', 'basis': 'unknown'}
+
+
+def classify_newspaper(text):
+    """Do not mistake a notice's submission website for website-development work."""
+    matches = {}
+    for line in text.splitlines():
+        for match in classify(line):
+            if match['category'] == 'Software' and re.search(r'\bsoftware\s+(?:technology\s+park|export\s+board)\b', line, re.I):
+                continue  # A buyer's postal address does not establish scope.
+            if match['category'] == 'Software' and re.search(r'web|portal|dashboard', match['keyword'], re.I):
+                if not re.search(r'\b(?:develop\w*|design\w*|maintain\w*|maintenance|upgrade\w*|hosting|implementation)\b', line, re.I):
+                    continue
+            matches.setdefault(match['category'], match)
+    urdu = {'IT equipment': r'کمپیوٹر|پرنٹر|لیپ ٹاپ', 'Networking': r'نیٹ ورک',
+            'CCTV': r'سی سی ٹی وی', 'Software': r'سافٹ ویئر', 'IT support': r'آئی ٹی سپورٹ'}
+    for category, expression in urdu.items():
+        match = re.search(expression, text)
+        if match:
+            matches.setdefault(category, {'category': category, 'keyword': match[0]})
+    return list(matches.values())
 
 
 def safe_url(url):
@@ -311,7 +348,7 @@ def update_records(db, records, now, complete=False, source_key=None):
                 db.execute('INSERT INTO changes(notice_id,recorded_at,fields) VALUES(?,?,?)', (record['id'], now, json.dumps(fields)))
         record['firstSeenAt'] = first_seen
         record['lastSeenAt'] = now
-        record['matches'] = classify(record['title'])
+        record['matches'] = classify_newspaper(record['title'] + '\n' + record.get('ocrText', '')) if record.get('newspaper') else classify(record['title'])
         record['eligibility'] = 'Not assessed — company details not added'
         record['documents'] = record.get('documents', [])
         db.execute('INSERT INTO notices(id,source_key,payload,first_seen,last_seen,listed) VALUES(?,?,?,?,?,1) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,last_seen=excluded.last_seen,listed=1',
@@ -514,9 +551,32 @@ def publish_feed(db, data_dir, now):
         tenders.append(item)
     merge_advertisements(tenders)
     feed = {'schemaVersion': 1, 'generatedAt': now,
-            'schedule': {'time': '06:00', 'timezone': 'Asia/Karachi', 'frequency': 'daily'},
+            'schedule': {'time': f'{OFFICIAL_RUN_HOUR:02}:00', 'timezone': PKT.key, 'frequency': 'daily'},
             'coverageNote': 'Federal EPADS, selected Punjab notices and selected official advertisement copies. Full newspaper edition coverage is pending.',
             'sources': sources, 'tenders': tenders}
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='newspaper_pilot'").fetchone():
+        pilot = db.execute('SELECT start_date FROM newspaper_pilot WHERE id=1').fetchone()
+        if pilot:
+            start = datetime.fromisoformat(pilot['start_date']).date()
+            today = datetime.fromisoformat(now).astimezone(PKT).date()
+            daily = {}
+            for row in db.execute('SELECT day,payload FROM newspaper_daily'):
+                daily.setdefault(row['day'], []).append(json.loads(row['payload']))
+            days = []
+            for index in range(7):
+                day = (start + timedelta(days=index)).isoformat()
+                editions = daily.get(day, [])
+                days.append({'date': day, 'expectedEditions': 5,
+                             'completeEditions': sum(item['status'] == 'connected' for item in editions),
+                             'partialEditions': sum(item['status'] == 'partial' for item in editions),
+                             'unavailableEditions': sum(item['status'] == 'unavailable' for item in editions) + (5 - len(editions) if day <= today.isoformat() else 0),
+                             'candidates': sum(item['count'] for item in editions),
+                             'pagesProcessed': sum(item['pagesProcessed'] for item in editions)})
+            feed['pilot'] = {'startDate': start.isoformat(), 'endDate': (start + timedelta(days=6)).isoformat(),
+                             'status': 'complete' if today > start + timedelta(days=6) else 'running',
+                             'daysCollected': len(daily), 'daysExpected': 7, 'days': days,
+                             'coverageNote': 'Three newspapers: Dawn national/Lahore/Islamabad pages, Jang Lahore/Rawalpindi and Express Lahore/Islamabad. Free local OCR; no uploads. Processing counts are not a guarantee that every ad was detected.'}
+            feed['coverageNote'] = 'Official sources plus a three-newspaper automatic pilot. Newspaper candidates are unverified; see Sources for dated edition coverage.'
     atomic_write(data_dir / 'feed.json', json.dumps(feed, ensure_ascii=False, separators=(',', ':')))
     return feed
 
@@ -572,9 +632,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data-dir', type=Path, default=Path(__file__).resolve().parent / 'data')
     parser.add_argument('--detail-limit', type=int, default=120)
+    parser.add_argument('--scheduled', action='store_true', help='Run only at 06:00 Asia/Karachi from hourly cron')
     arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+    if arguments.scheduled and not scheduled_hour((OFFICIAL_RUN_HOUR,)):
+        raise SystemExit(0)
+    configure_logging(arguments.data_dir / 'official-cron.log' if arguments.scheduled else None)
+    if arguments.scheduled:
+        logging.info('Scheduled official collection started at %s', iso_now())
     result = run(arguments.data_dir, max(0, min(arguments.detail_limit, 250)))
-    print(json.dumps(result))
+    summary = json.dumps(result)
+    if arguments.scheduled:
+        logging.info('%s', summary)
+    print(summary)
     if result.get('connectedSources') == 0 and not result.get('skipped'):
         raise SystemExit(1)

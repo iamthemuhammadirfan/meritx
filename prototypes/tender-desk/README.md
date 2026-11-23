@@ -2,6 +2,8 @@
 
 Live at **https://tenders.meritxsc.com/**. Official notices replaced the fictional prototype on 17 November 2026. The main-domain `/tenders` and `/tenders/` routes remain retired and return 404.
 
+**Prepared on development, not deployed:** individual team login and an automatic seven-day Dawn/Jang/Express newspaper pilot. No uploads, paid subscriptions or AI APIs. See [the pilot runbook](../../docs/tender-newspaper-pilot.txt) for provisioning, access checks, free OCR setup, scheduling and the measured limitations. The deployed release described below remains unchanged until the required production release. The new API fails closed without its private team store; its catalog and evidence require sign-in. Use `node --test api/*.test.cjs` for all API/access tests and install `engine/newspaper-requirements.txt` for the newspaper parser suite.
+
 ## Coverage and matching
 
 The daily collector also checks Federal PPRA's public tender listings and selects up to 120 active detail pages, prioritizing Lahore and MeritX service keywords. Official advertisement PDFs are linked from the issuing agency's PPRA record. These can include newspaper clippings and publication-ready ad copies. The dashboard's advertisement filter shows this evidence. Exact EPADS references are merged when deadlines agree. Conflicting deadlines keep both records and display a warning. Failed checks retain previously collected evidence.
@@ -24,7 +26,7 @@ Crawler policies are checked, requests are paced and bounded, and TLS verificati
 
 ## Daily schedule and checks
 
-Spaceship job **`job-01M7MABKDDTV1EMX9VMVRYTMRP`** runs at **06:00 Asia/Karachi daily**, with overlap prevention, one catch-up run for a missed firing, and a 20-minute runtime limit. It is enabled and synced to crontab. A scheduler-triggered end-to-end run succeeded on 17 November 2026 with two connected sources and the central Punjab timeout reported accurately. The next natural daily firing had not occurred at initial deployment.
+Spaceship job **`job-01M7MABKDDTV1EMX9VMVRYTMRP`** is enabled. On 23 November 2026 its native `0 6 * * *` entry started at **16:00 Asia/Karachi** because the host was on **06:00 EST**. The intended schedule is **06:00 Asia/Karachi**. The [pilot runbook](../../docs/tender-newspaper-pilot.txt) describes the replacement hourly trigger and Pakistan-time checks for official and newspaper collection.
 
 ```sh
 # Hosting: run manually
@@ -72,12 +74,12 @@ Python Selector's ordinary hosting interface is WSGI, whereas FastAPI/Uvicorn re
 After an explicit production release request:
 
 1. Follow the repository's development-to-main release rule, with passing validation. The marketing workflow excludes tenders and does not perform this subdomain cutover.
-2. Stage only `app.cjs`, `api/server.cjs`, `package.json`, `index.html` and `assets/` in a private versioned application directory outside all document roots. No runtime npm install is needed. Set private ownership/permissions for the hosting account. Do not upload tests, raw responses, company records or collector state to a public directory.
+2. Stage the authenticated app files listed in the pilot runbook in a private versioned application directory outside all document roots. No runtime npm install is needed. Keep collector state and the team store in the private engine directory.
 3. Back up the current subdomain files and configuration privately. Record the old app mapping for rollback. Keep SQLite and collector backups separate.
-4. In **Setup Node.js App**, register Node 22 in Production mode, application root pointing at that private release, URL `tenders.meritxsc.com` with root URI `/`, startup file `app.cjs`. Set `MERITX_FEED_PATH=/home/rhjnctqjdv/.meritx-tender-engine/data/feed.json`, `MERITX_ALLOWED_HOSTS=tenders.meritxsc.com,localhost,127.0.0.1` and `NODE_ENV=production`. Use the same account UID; the API can read the private snapshot without weakening its permissions.
+4. In **Setup Node.js App**, use Node 22 in Production mode, application root pointing at that private release, URL `tenders.meritxsc.com` with root URI `/`, startup file `app.cjs`. Set the full environment from the pilot runbook, including `MERITX_TEAM_PATH` and `MERITX_PUBLIC_ORIGIN`. Use the same account UID and bootstrap the administrator before starting the app.
 5. Preserve the subdomain's existing DNS and TLS. Preserve HTTPS redirect and public security headers, but retain the app manager's generated Passenger directives. Move the obsolete public index/assets/PHP files to the private release backup so stale static files cannot shadow the Node routes. The private app serves the new UI and assets. Verify manager registration on this specific subdomain; that public mapping has not been exercised by the loopback tests.
-6. Restart through the app manager. Check public GET/HEAD, gzip, conditional ETags, `/healthz`, `/readyz`, actual source data and browser filters. Confirm the old PHP endpoint and private source paths return 404, and `/tenders/` on the main domain remains 404. Confirm process restart behavior through the manager. If checks fail, remove the new app mapping and restore the previous document-root files/configuration.
-7. Keep the existing 06:00 Asia/Karachi job. It writes the same atomic snapshot; no duplicate scheduler or database migration is required. Confirm one natural scheduled firing after cutover.
+6. Restart through the app manager. Check public `/healthz`, the redirect to `/login` and anonymous API denial. Check authenticated `/readyz`, catalog GET/HEAD, gzip, conditional ETags, actual source data and browser filters. Verify that private paths and the old PHP endpoint stay inaccessible, and `/tenders/` on the main domain returns 404. Confirm actual process replacement. If checks fail, follow the pilot rollback guidance before restoring the previous app mapping.
+7. Follow the pilot runbook for replacing the official cron entry, starting newspaper collection after login is verified, and confirming natural scheduled firings.
 
 The optional Dockerfile is a portable web-only candidate, not locally Docker-tested or needed for Spaceship shared hosting. Build its context from this directory. It uses Node 22 and port 8080 as the unprivileged `node` user (UID 1000). Mount only a public `feed.json` read-only at `/data/feed.json`, with suitable ownership. A separate Python worker must publish updates; this image does not contain Python or worker state. Cross-host deployment needs an explicit snapshot transfer mechanism and durable storage, not just a local bind mount.
 
