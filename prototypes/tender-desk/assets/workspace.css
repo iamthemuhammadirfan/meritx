@@ -1,0 +1,60 @@
+@font-face {
+  font-family: Manrope;
+  src: url('./manrope-latin-wght-normal.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('./source-sans-3-latin-wght-normal.woff2') format('woff2');
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --ground: light-dark(#f2f4f8, #171a24);
+  --surface: light-dark(#fff, #202431);
+  --muted-surface: light-dark(#f7f8fb, #252a39);
+  --line: light-dark(#dfe3ec, #3d4356);
+  --ink: light-dark(#1b2037, #edeffb);
+  --muted: light-dark(#555e73, #aeb6ce);
+  --blue: light-dark(#4840a1, #c0b5ff);
+  --blue-wash: light-dark(#efedfb, #34304f);
+  --orange: light-dark(#8f470e, #ffc593);
+  --orange-wash: light-dark(#fff2e4, #3d2c26);
+  --teal: light-dark(#166652, #97ddc8);
+  --teal-wash: light-dark(#e6f4ee, #254037);
+  --accent: light-dark(#43398b, #c0b5ff);
+  --accent-foreground: light-dark(#fff, #211941);
+  --background: var(--ground);
+  --foreground: var(--ink);
+  --border: var(--line);
+  --accent-soft: var(--blue-wash);
+  --focus: var(--blue);
+  font: 16px/1.45 'Source Sans 3', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--ground);
+}
+
+:root[data-theme='dark'] { color-scheme: dark; }
+* { box-sizing: border-box; }
+body, h1, h2, h3, p, dl, dd { margin: 0; }
+[hidden] { display: none !important; }
+button:not(.button), input, select { font: inherit; color: inherit; }
+button, summary { cursor: pointer; }
+a:not(.button) { color: var(--blue); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+h1, h2, h3 { font-family: Manrope, system-ui, sans-serif; }
+
+.mx-brand {
+  display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;
+  font: 800 20px/1.1 Manrope, system-ui, sans-serif; letter-spacing: -.04em;
+}
+.mx-brand small { display: block; margin-top: 4px; color: var(--muted); font: 600 12px/1.15 'Source Sans 3', sans-serif; letter-spacing: 0; }
+.mx-mark {
+  display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto;
+  border-radius: 10px; color: #e7dfff; background: #23233f;
+}
+.mx-mark svg { width: 18px; height: 18px; }

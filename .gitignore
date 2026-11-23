@@ -11,3 +11,5 @@ coverage/
 .vercel/
 __pycache__/
 .private/
+/prototypes/tender-desk/assets/tender-details.bundle.js
+/prototypes/tender-desk/assets/heroui.bundle.css

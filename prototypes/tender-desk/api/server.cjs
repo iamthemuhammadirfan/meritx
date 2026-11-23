@@ -136,7 +136,8 @@ function etagMatches(header, etag) {
 }
 
 const CONTENT_TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.txt': 'text/plain; charset=utf-8' };
+  '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml',
+  '.webp': 'image/webp', '.txt': 'text/plain; charset=utf-8' };
 
 function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.homedir(), '.meritx-tender-engine/data/feed.json'),
   frontend = path.resolve(__dirname, '..'), clock = Date.now,

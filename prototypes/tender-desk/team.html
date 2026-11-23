@@ -1,2 +1,52 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>Team access · MeritX Tender Desk</title><link rel="stylesheet" href="/assets/team.css?v=team-pilot-1"><script src="/assets/team.js?v=team-pilot-1" defer></script></head><body><main class="team-shell"><header class="team-header"><a class="brand" href="/">Merit<span>X</span><small>TENDER DESK</small></a><a href="/">Back to tender desk</a></header><p class="eyebrow">Private workspace</p><h1>Team access</h1><p>Invite colleagues, reset access or disable an account.</p><div class="team-grid"><section class="team-card"><h2>Invite a team member</h2><p>Share the generated link directly. It expires after 48 hours and can be used once. A new invitation resets that person’s existing access.</p><form id="invite-form"><label>Name<input name="name" required maxlength="100" autocomplete="name"></label><label>Work email<input name="email" type="email" required maxlength="254" autocomplete="email"></label><label>Role<select name="role"><option value="member">Team member</option><option value="admin">Administrator</option></select></label><button class="primary" type="submit">Create invitation</button><p id="team-status" role="status" aria-live="polite"></p></form><div id="invitation" hidden><label>Private invitation link<input id="invitation-link" readonly></label><button id="copy-link" type="button">Copy link</button><p id="expires"></p></div></section><section class="team-card"><h2>Your team</h2><div id="members" aria-live="polite">Loading team…</div></section></div></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#f2f4f8">
+  <title>Team access · MeritX Tender Desk</title>
+  <link rel="stylesheet" href="/assets/heroui.bundle.css?v=hero-workspace-2">
+  <link rel="stylesheet" href="/assets/workspace.css?v=hero-workspace-2">
+  <link rel="stylesheet" href="/assets/team.css?v=hero-workspace-3">
+  <script src="/assets/appearance.js?v=hero-workspace-2" defer></script>
+  <script src="/assets/lucide-0.468.0.min.js" defer></script>
+  <script src="/assets/team.js?v=hero-workspace-3" defer></script>
+</head>
+<body>
+<main class="team-shell">
+  <header class="team-header">
+    <a class="mx-brand" href="/"><span class="mx-mark"><i data-lucide="layers-3" aria-hidden="true"></i></span><span>MeritX<small>Tender Desk</small></span></a>
+    <a class="button button--outline button--sm" href="/"><i data-lucide="arrow-left" aria-hidden="true"></i> Back to dashboard</a>
+  </header>
+  <section class="team-banner" aria-labelledby="team-title">
+    <img src="/assets/procurement-archive.webp" alt="">
+    <div><h1 id="team-title">Team access</h1><p>Invite colleagues and manage who can open the tender workspace.</p></div>
+  </section>
+  <div class="team-grid">
+    <section class="card card--default team-card" aria-labelledby="invite-heading">
+      <header class="card__header team-card-head"><span class="team-card-icon"><i data-lucide="user-plus" aria-hidden="true"></i></span><div><h2 id="invite-heading">Invite a team member</h2><p>One-time invitations expire after 48 hours.</p></div></header>
+      <form id="invite-form" class="card__content">
+        <label class="access-field">Name<input class="input input--primary" name="name" required maxlength="100" autocomplete="name"></label>
+        <label class="access-field">Work email<input class="input input--primary" name="email" type="email" required maxlength="254" autocomplete="email"></label>
+        <label class="access-field" for="team-role">Role</label>
+        <select id="team-role" class="input input--primary" name="role" aria-describedby="role-note"><option value="member">Team member</option><option value="admin">Administrator</option></select>
+        <p class="role-note" id="role-note">Administrators can invite people and manage access.</p>
+        <button class="button button--primary button--full-width" type="submit">Create invitation</button>
+        <p id="team-status" class="access-status" role="status" aria-live="polite"></p>
+      </form>
+      <div id="invitation" class="invitation-card" hidden>
+        <label class="access-field">Private invitation link<input class="input input--primary" id="invitation-link" readonly></label>
+        <button id="copy-link" class="button button--outline button--sm" type="button">Copy link</button>
+        <p id="expires"></p>
+      </div>
+    </section>
+    <section class="card card--default team-card member-card" aria-labelledby="members-heading">
+      <header class="card__header team-card-head"><span class="team-card-icon"><i data-lucide="users" aria-hidden="true"></i></span><div><h2 id="members-heading">Workspace members</h2><p>Manage active accounts and invitations.</p></div><span id="member-count" class="member-count" hidden></span></header>
+      <div id="members" aria-live="polite">Loading team…</div>
+      <p class="member-footnote">Creating a new invitation for an existing email resets that person’s access.</p>
+    </section>
+  </div>
+</main>
+</body>
+</html>

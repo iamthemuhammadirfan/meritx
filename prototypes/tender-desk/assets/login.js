@@ -1,8 +1,11 @@
 (() => {
   'use strict';
+  globalThis.lucide?.createIcons();
   const activation = location.pathname === '/activate';
   const token = activation ? location.hash.slice(1) : '';
-  if (location.hash) history.replaceState(null, '', location.pathname);
+  const tender = activation ? null : new URLSearchParams(location.hash.slice(1)).get('tender');
+  const detailHash = tender && /^[a-z0-9_-]{1,99}$/i.test(tender) ? `#tender=${encodeURIComponent(tender)}` : '';
+  if (activation && location.hash) history.replaceState(null, '', location.pathname);
   const form = document.querySelector('#access-form');
   const password = document.querySelector('#password');
   const status = document.querySelector('#form-status');
@@ -27,7 +30,7 @@
       const response = await fetch(activation ? '/api/auth/activate' : '/api/auth/login', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(activation ? { token, password: password.value } : { email: document.querySelector('#email').value, password: password.value }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Sign-in failed. Try again.');
-      location.replace('/');
+      location.replace('/' + detailHash);
     } catch (error) { status.textContent = error.message; button.disabled = false; }
   });
 })();
