@@ -12,9 +12,29 @@
   }
   async function load() {
     const result = await call('/api/team');
-    document.querySelector('#members').innerHTML = result.users.map(user => `<div class="member"><strong>${esc(user.name)}</strong><p>${esc(user.email)}<br>${user.role === 'admin' ? 'Administrator' : 'Team member'} · ${user.active ? 'Active' : 'Inactive or invitation pending'}</p>${user.id === session.user.id ? '<p>Your account</p>' : `<button type="button" data-disable="${esc(user.id)}">Disable access</button>`}</div>`).join('');
+    const memberCount = document.querySelector('#member-count');
+    const count = result.users.length;
+    memberCount.textContent = count;
+    memberCount.setAttribute('aria-label', `${count} workspace ${count === 1 ? 'member' : 'members'}`);
+    memberCount.hidden = false;
+    document.querySelector('#members').innerHTML = result.users.map(user => {
+      const self = user.id === session.user.id;
+      const initials = user.name.trim().split(/\s+/).slice(0, 2).map(word => word[0]).join('').toUpperCase();
+      return `<div class="member">
+        <span class="member-avatar" aria-hidden="true">${esc(initials)}</span>
+        <div><strong>${esc(user.name)}${self ? ' · You' : ''}</strong>
+        <p>${esc(user.email)}</p><p>${user.role === 'admin' ? 'Administrator' : 'Team member'}
+        <span class="member-status" data-active="${user.active}">${user.active ? 'Active' : 'Invite pending or inactive'}</span></p></div>
+        ${self ? '<span></span>' : `<button class="button button--outline button--sm" type="button" data-disable="${esc(user.id)}">Disable access</button>`}
+      </div>`;
+    }).join('');
   }
-  try { session = await call('/api/auth/session'); await load(); } catch (error) { status.textContent = error.message; return; }
+  globalThis.lucide?.createIcons();
+  try { session = await call('/api/auth/session'); await load(); } catch (error) {
+    status.textContent = error.message;
+    document.querySelector('#members').textContent = 'Team members could not be loaded.';
+    return;
+  }
   document.querySelector('#invite-form').addEventListener('submit', async event => {
     event.preventDefault();
     const button = event.target.querySelector('button'); button.disabled = true;
@@ -24,7 +44,7 @@
       document.querySelector('#invitation-link').value = result.activationUrl;
       document.querySelector('#expires').textContent = `Expires ${new Date(result.expiresAt).toLocaleString('en-GB', { timeZone: 'Asia/Karachi' })} PKT. Share only with this team member.`;
       document.querySelector('#invitation').hidden = false;
-      status.textContent = 'Invitation created. No email has been sent.';
+      status.textContent = 'Invitation created. Copy the link to share it privately.';
       await load();
     } catch (error) { status.textContent = error.message; } finally { button.disabled = false; }
   });

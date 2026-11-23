@@ -16,5 +16,6 @@ export default defineConfig([
     ".private/**",
     "next-env.d.ts",
     "prototypes/tender-desk/assets/lucide-0.468.0.min.js",
+    "prototypes/tender-desk/assets/tender-details.bundle.js",
   ]),
 ]);

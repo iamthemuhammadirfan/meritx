@@ -3,6 +3,20 @@
   "version": "0.2.0",
   "private": true,
   "type": "commonjs",
-  "engines": { "node": ">=22" },
-  "scripts": { "start": "node app.cjs", "test": "node --test api/*.test.cjs" }
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "esbuild frontend/tender-details.jsx --bundle --minify --jsx=automatic --outfile=assets/tender-details.bundle.js && node -e \"require('node:fs').copyFileSync('node_modules/@heroui/styles/dist/heroui.min.css', 'assets/heroui.bundle.css')\"",
+    "prestart": "npm run build",
+    "start": "node app.cjs",
+    "test": "node --test api/*.test.cjs"
+  },
+  "devDependencies": {
+    "@heroui/react": "3.2.8",
+    "@heroui/styles": "3.2.8",
+    "esbuild": "0.28.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
 }

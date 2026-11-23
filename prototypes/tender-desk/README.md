@@ -48,9 +48,15 @@ The API caches the public projection and its gzip representation until the snaps
 Use Node.js 22 or newer. From the repository root:
 
 ```sh
+npm ci --prefix prototypes/tender-desk
+npm run build --prefix prototypes/tender-desk
 # Set this to an existing public snapshot; a page visit does not create one.
 MERITX_FEED_PATH=/absolute/private/path/feed.json node prototypes/tender-desk/app.cjs
 ```
+
+The frontend build creates `assets/tender-details.bundle.js` for the HeroUI
+detail drawer and `assets/heroui.bundle.css` for its component styles. Include
+both generated assets when packaging a release. Node serves them directly.
 
 Open `http://127.0.0.1:8053/`. To collect locally, install `engine/requirements.txt` in a private Python environment and run `engine/collector.py --data-dir /absolute/private/path`, following the source-access policies above. Tests use synthetic fixtures and make no external collection requests:
 

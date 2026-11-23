@@ -7,3 +7,6 @@
 **/raw/
 README.md
 .htaccess
+node_modules/
+assets/tender-details.bundle.js
+assets/heroui.bundle.css
