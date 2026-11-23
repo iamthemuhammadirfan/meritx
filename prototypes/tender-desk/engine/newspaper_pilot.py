@@ -10,6 +10,7 @@ from datetime import date, datetime, timedelta
 import fcntl
 import hashlib
 import io
+import importlib.util
 import json
 import logging
 import os
@@ -17,6 +18,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import time
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
@@ -218,14 +220,26 @@ def verify_private_site(origin):
 
 
 class LocalOCR:
-    def __init__(self, db, directory, tessdata=None, languages='eng+urd'):
+    def __init__(self, db, directory, tessdata=None, languages='eng+urd', backend='auto'):
         self.db, self.directory, self.tessdata, self.languages = db, directory, tessdata, languages
         self.binary = shutil.which('tesseract')
-        if not self.binary:
-            raise RuntimeError('Install the free Tesseract executable before starting the pilot')
+        if backend not in ('auto', 'cli', 'bundled'):
+            raise ValueError('Choose an available OCR backend')
+        self.backend = 'bundled' if backend == 'bundled' or (backend == 'auto' and not self.binary) else 'cli'
         self.extra = ['--tessdata-dir', str(tessdata)] if tessdata else []
-        result = subprocess.run([self.binary, '--list-langs', *self.extra], capture_output=True, text=True, timeout=10, check=True)
-        if not set(languages.split('+')) <= set(result.stdout.splitlines()):
+        self.helper = Path(__file__).with_name('ocr_worker.py')
+        if self.backend == 'cli':
+            if not self.binary:
+                raise RuntimeError('The Tesseract command-line executable is unavailable')
+            command = [self.binary, '--list-langs', *self.extra]
+        else:
+            if not tessdata or not importlib.util.find_spec('tesserocr'):
+                raise RuntimeError('Install the free tesserocr wheel and provide the OCR language-data directory')
+            command = [sys.executable, str(self.helper), '--tessdata', str(tessdata), '--languages', languages, '--check']
+        result = subprocess.run(command, capture_output=True, text=True, timeout=15, check=True,
+                                env={**os.environ, 'OMP_THREAD_LIMIT': '1'})
+        available = json.loads(result.stdout)['languages'] if self.backend == 'bundled' else result.stdout.splitlines()
+        if not set(languages.split('+')) <= set(available):
             raise RuntimeError('The pilot requires both English and Urdu Tesseract language files')
 
     def read(self, image):
@@ -240,14 +254,16 @@ class LocalOCR:
         output = io.BytesIO(); image.save(output, 'PNG')
         data = output.getvalue()
         digest = hashlib.sha256(data).hexdigest()
-        cache_key = hashlib.sha256((OCR_VERSION + self.languages + digest).encode()).hexdigest()
+        cache_key = hashlib.sha256((OCR_VERSION + self.backend + self.languages + digest).encode()).hexdigest()
         old = self.db.execute('SELECT text FROM newspaper_ocr WHERE digest=?', (cache_key,)).fetchone()
         if old:
             return old['text'], digest, data
         filename = self.directory / (digest + '.work.png')
         filename.write_bytes(data)
         try:
-            result = subprocess.run([self.binary, str(filename), 'stdout', '-l', self.languages, '--psm', '3', *self.extra],
+            command = ([self.binary, str(filename), 'stdout', '-l', self.languages, '--psm', '3', *self.extra]
+                       if self.backend == 'cli' else [sys.executable, str(self.helper), '--tessdata', str(self.tessdata), '--languages', self.languages, str(filename)])
+            result = subprocess.run(command,
                                     capture_output=True, text=True, timeout=60, check=True,
                                     env={**os.environ, 'OMP_THREAD_LIMIT': '1'})
             text = result.stdout[:80_000]
@@ -389,7 +405,9 @@ def run(data_dir, start=False, requested_day=None, tessdata=None, seconds=900):
             db.execute('INSERT OR IGNORE INTO newspaper_pilot VALUES(1,?)', (beginning.isoformat(),))
         outcomes = []
         for source in edition_sources(day):
-            client.edition_end = min(client.end, time.monotonic() + max(15, seconds / 5))
+            # Dawn combines national/business pages and both priority metros.
+            weight = 2 if source['kind'] == 'dawn' else 1
+            client.edition_end = min(client.end, time.monotonic() + max(15, seconds * weight / 6))
             now = iso_now()
             old = db.execute('SELECT payload FROM source_state WHERE source_key=?', (source['key'],)).fetchone()
             old = json.loads(old['payload']) if old else {}

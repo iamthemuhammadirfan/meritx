@@ -7,8 +7,13 @@ The new team login and newspaper worker are implemented and locally verified.
 They are not deployed, scheduled, or started as a production seven-day pilot.
 The local smoke run is isolated under .private/newspaper-pilot-smoke and must
 not be copied over the production database. Its start date is test data.
-The Spaceship/MeritX MCP returned Authentication required during preparation;
-the host's Tesseract availability and worker capacity remain unverified.
+Hosting access was restored on 23 November. The host has Python 3.13.18 and
+no system Tesseract executable. Free tesserocr 2.13.0 wheels successfully loaded
+the bundled Tesseract 5.5.4 runtime in a separate private staging package folder.
+An automatic fetch of Jang Rawalpindi page 5 on the hosting server extracted an
+IT equipment tender with English/Urdu models in about 21 seconds of OCR. No
+production data, application mapping or scheduled job was changed.
+The confirmed administrator is info@meritxsc.com (MeritX administrator).
 Follow AGENTS.md: production needs an explicit release request, a development
 to main pull request, and a passing validate check before deployment.
 
@@ -59,10 +64,11 @@ Required environment variables on the Node application:
 The team file is 0600 in a 0700 private directory outside all document roots.
 An absent, malformed or overly readable store fails closed. No password or
 activation link belongs in Git, screenshots, deployment logs or shared files.
-Use the administrator's confirmed email; no real accounts were invented.
+The confirmed administrator is info@meritxsc.com; no production account has
+been created yet. Bootstrap it only during the approved release.
 
 From an account-owned terminal, before launching the new app:
-  node team.cjs init-admin ADMIN_EMAIL ADMIN_NAME
+  node team.cjs init-admin info@meritxsc.com "MeritX administrator"
 This prints one private activation link. The actual administrator opens it and
 sets their password. Use invite-admin only for an existing store's offline
 recovery. Never run init-admin against an existing store to reset it.
@@ -89,18 +95,28 @@ same private data directory and collector.lock as the official worker; overlaps
 skip without modifying either job's database. Do not copy a local SQLite file
 over production. The official worker can publish the same combined snapshot.
 
-Check command -v tesseract and its version on the actual worker host first.
-Install only free tools. On a managed Linux host with package privileges,
-tesseract-ocr is the system package; macOS uses Homebrew tesseract. Shared
-Spaceship hosting may not allow installation of a system executable. A Python
-package alone does not install Tesseract. Do not enable production scheduling
-until a working host is verified. If necessary, an existing office computer
-can do OCR, but unattended uptime and secure automatic publication need to be
-implemented and verified before calling that a live solution. No new paid host
-is authorized for this pilot.
+The worker supports two free backends. It uses a system Tesseract executable
+when available; otherwise it runs the runtime bundled in the pinned tesserocr
+wheel through ocr_worker.py. Both run in a child process with a 60-second OCR
+timeout and one CPU thread. No root access, system package or AI API is needed
+for the bundled backend. Both require the pinned English/Urdu language files.
+
+Verified on the actual host on 23 November: CPython 3.13.18, x86_64, glibc 2.28.
+The manylinux 2.27/2.28 tesserocr wheel and Pillow wheel load successfully.
+Private test packages were installed under ~/.meritx-newspaper-pilot-stage/
+packages using the existing permitted collector interpreter and pip --target.
+This leaves the live collector's packages unchanged. The MCP allowlist rejects
+the new staging virtualenv's interpreter; use the existing permitted private
+collector interpreter, not arbitrary new executable paths. No policy changes
+were made. During an approved production release, install the pinned worker
+requirements into the existing private environment and verify it again before
+scheduling. Account disk headroom was approximately 19.8 GB. Current LVE CPU
+and memory limits were unavailable from MCP; zero values are not unlimited.
+A one-page test measured roughly 50 MiB main-process peak RSS and 115 MiB
+child-process peak RSS; this is a sample, not a full-run capacity guarantee.
 
 Within the private Python environment:
-  pip install -r newspaper-requirements.txt
+  pip install --only-binary=:all: -r newspaper-requirements.txt
   python prepare_ocr.py --tessdata /PRIVATE_ENGINE/tessdata
 prepare_ocr.py downloads only pinned free Tesseract English and Urdu language
 files from the official repository, validates SHA-256 hashes and reuses valid
@@ -115,11 +131,20 @@ date; --start never resets an existing pilot. Do not transfer the smoke DB.
 Then register automatic checks at 07:00, 09:00 and 12:00 Asia/Karachi each day:
   python newspaper_pilot.py --data-dir /PRIVATE_ENGINE/data --tessdata /PRIVATE_ENGINE/tessdata
 Use absolute paths to the private environment's Python and script in hosting.
-Configure the scheduler timezone explicitly; these correspond to 02:00, 04:00
-and 07:00 UTC on a UTC cron host. Preserve the separate 06:00 PKT official job.
+Verified scheduling caveat on 23 November: the host uses America/New_York
+(EST, UTC-05:00), and its actual crontab has no timezone directive. The existing
+official entry is literally 0 6 * * *, so it fires at 16:00 PKT, despite the MCP
+job record labeling it Asia/Karachi. Do not assume the metadata changes the OS
+cron timezone. For this November pilot, 07:00, 09:00 and 12:00 PKT correspond to
+21:00 and 23:00 on the previous EST day, and 02:00 on the current EST day. Use
+0 2,21,23 * * * with the native job's timezone set to America/New_York, then
+verify the synced crontab and one natural firing. Correct the separate official
+job to 0 20 * * * in America/New_York for its intended 06:00 PKT. No existing
+job was changed during preparation. Recheck the server offset at actual release
+and calculate again if it changes; do not reuse these EST values across DST.
 Use a 20-minute outer job limit and a private log with bounded retention.
 The worker normally has a 15-minute total budget, a fair budget per edition,
-up to 48 pages per group, 600 requests and 300 MB downloaded per run. Model OCR
+a double page-time allocation for Dawn, up to 48 pages per group, 600 requests and 300 MB downloaded per run. Model OCR
 has a 60-second per-image timeout, one CPU thread and image pixel limits. Later
 checks reuse OCR results. Express menus are deduplicated by printed page, so
 different View parameters do not double-count pages. Missed-day recovery uses
@@ -171,6 +196,11 @@ Local validation evidence, 23 November 2026
 - Parser tests cover edition/date isolation, repeated page links, crawler and
   image restrictions, unknown OCR deadlines, missing editions and pilot end.
 - Browser preview verified sign-in, Sources, team screen and sign-out.
+- Actual-host bundled OCR fetched a dated Rawalpindi page automatically,
+  extracted 13,642 characters, and detected IT equipment. The host test used
+  separate staged source, packages, models and SQLite, never live feed state.
+- CI downloads hash-verified models and tests the bundled backend without a
+  system executable, repeated-image caching, and timeout cleanup.
 
 Release only after the repository's validate check passes. The tender app is
 separate from the marketing-site deployment and needs its own staged cutover.

@@ -29,8 +29,9 @@ jobs:
         run: |
           python3 -m venv /tmp/meritx-tender-tests
           /tmp/meritx-tender-tests/bin/pip install -r prototypes/tender-desk/engine/newspaper-requirements.txt
+          /tmp/meritx-tender-tests/bin/python prototypes/tender-desk/engine/prepare_ocr.py --tessdata /tmp/meritx-tender-tessdata
           node --test prototypes/tender-desk/api/*.test.cjs
-          /tmp/meritx-tender-tests/bin/python -m unittest discover -s prototypes/tender-desk/engine -p 'test_*.py' -v
+          MERITX_TEST_TESSDATA=/tmp/meritx-tender-tessdata /tmp/meritx-tender-tests/bin/python -m unittest discover -s prototypes/tender-desk/engine -p 'test_*.py' -v
           node --check prototypes/tender-desk/assets/dashboard.js
           node --check prototypes/tender-desk/assets/login.js
           node --check prototypes/tender-desk/assets/team.js

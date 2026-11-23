@@ -2,6 +2,7 @@
 """Install verified, free English/Urdu language files in private storage."""
 import argparse
 import hashlib
+import importlib.util
 import os
 from pathlib import Path
 import shutil
@@ -13,8 +14,8 @@ MODELS = {'eng': '7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170
 
 
 def prepare(directory):
-    if not shutil.which('tesseract'):
-        raise RuntimeError('Install the free Tesseract executable first; no AI API is used')
+    if not shutil.which('tesseract') and not importlib.util.find_spec('tesserocr'):
+        raise RuntimeError('Install the free tesserocr wheel or Tesseract executable first; no AI API is used')
     os.umask(0o077)
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     for language, expected in MODELS.items():
