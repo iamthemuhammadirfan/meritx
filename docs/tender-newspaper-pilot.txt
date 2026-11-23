@@ -128,21 +128,34 @@ After live login, host readiness and bootstrap are verified, run once:
 The private database starts a seven-calendar-day window on that actual PKT
 date; --start never resets an existing pilot. Do not transfer the smoke DB.
 
-Then register automatic checks at 07:00, 09:00 and 12:00 Asia/Karachi each day:
-  python newspaper_pilot.py --data-dir /PRIVATE_ENGINE/data --tessdata /PRIVATE_ENGINE/tessdata
-Use absolute paths to the private environment's Python and script in hosting.
-Verified scheduling caveat on 23 November: the host uses America/New_York
-(EST, UTC-05:00), and its actual crontab has no timezone directive. The existing
-official entry is literally 0 6 * * *, so it fires at 16:00 PKT, despite the MCP
-job record labeling it Asia/Karachi. Do not assume the metadata changes the OS
-cron timezone. For this November pilot, 07:00, 09:00 and 12:00 PKT correspond to
-21:00 and 23:00 on the previous EST day, and 02:00 on the current EST day. Use
-0 2,21,23 * * * with the native job's timezone set to America/New_York, then
-verify the synced crontab and one natural firing. Correct the separate official
-job to 0 20 * * * in America/New_York for its intended 06:00 PKT. No existing
-job was changed during preparation. Recheck the server offset at actual release
-and calculate again if it changes; do not reuse these EST values across DST.
-Use a 20-minute outer job limit and a private log with bounded retention.
+Schedule the first newspaper check at 08:00 Asia/Karachi and a 21:00 retry for
+editions that appear later. Restore the official collector's intended 06:00
+Asia/Karachi slot. On 23 November the server reported EST (UTC-05:00). Its
+crontab has no timezone directive, and the existing official job's bare
+0 6 * * * entry started at 16:00 PKT that day. The connector's Asia/Karachi
+job label does not control the system crontab.
+
+After cutover, install the updated collector.py and newspaper_pilot.py in the
+private engine directory. Create two managed jobs with schedule 0 * * * * and
+timezone America/New_York, using absolute paths to the private interpreter,
+scripts and data. Set overlap and misfire to skip and max runtime to 20 minutes.
+Use these command lines:
+  /PRIVATE_ENGINE/venv/bin/python /PRIVATE_ENGINE/collector.py --data-dir /PRIVATE_ENGINE/data --scheduled
+  /PRIVATE_ENGINE/venv/bin/python /PRIVATE_ENGINE/newspaper_pilot.py --data-dir /PRIVATE_ENGINE/data --tessdata /PRIVATE_ENGINE/tessdata --scheduled
+Both workers check the current Asia/Karachi hour and exit quietly before
+collecting outside their slots. This follows PKT through New York daylight
+saving changes without adjusting cron. The scheduled newspaper worker also
+requires an anonymous 401 from the tender API before collection. Keep one
+official job enabled. Disable the old daily official job when enabling its
+replacement, and restore the old job if the scheduling cutover is rolled back.
+
+Read the native crontab and verify both entries include --scheduled. Confirm a
+natural firing for each worker by checking its private official-cron.log or
+newspaper-cron.log and the feed's source attempt timestamps in PKT. These logs
+rotate at 512 KB with two backups. The updated newspaper command exits with
+failure when it processes zero pages and still records edition coverage. A
+manual rerun omits --scheduled and still requires a private tender API.
+
 The worker normally has a 15-minute total budget, a fair budget per edition,
 a double page-time allocation for Dawn, up to 48 pages per group, 600 requests and 300 MB downloaded per run. Model OCR
 has a 60-second per-image timeout, one CPU thread and image pixel limits. Later

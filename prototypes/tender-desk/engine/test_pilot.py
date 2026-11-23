@@ -1,14 +1,17 @@
 import json
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from collector import classify_newspaper, connect_db, publish_feed, update_records
+from collector import (OFFICIAL_RUN_HOUR, classify_newspaper, connect_db, publish_feed,
+                       scheduled_hour, update_records)
 from newspaper_pilot import (approved, candidate, discover_pages, edition_sources,
-                             decode_image, initialize_db, is_tender, parse_page, Page, PublisherClient, verify_private_site)
+                             decode_image, initialize_db, is_tender, main, NEWSPAPER_RUN_HOURS,
+                             parse_page, Page, PublisherClient, verify_private_site)
 from urllib.error import HTTPError
+from zoneinfo import ZoneInfo
 from PIL import Image
 import io
 
@@ -74,6 +77,42 @@ class PilotTests(unittest.TestCase):
             verify_private_site('https://tenders.meritxsc.com')
         with self.assertRaises(ValueError):
             verify_private_site('http://unsecured.invalid')
+
+    def test_hourly_cron_follows_karachi_through_new_york_dst(self):
+        new_york = ZoneInfo('America/New_York')
+        for month, expected_host_hours in [(1, [20, 22, 11]), (7, [21, 23, 12])]:
+            for hour, host_hour in zip((OFFICIAL_RUN_HOUR, *NEWSPAPER_RUN_HOURS), expected_host_hours):
+                with self.subTest(month=month, hour=hour):
+                    tick = datetime(2026, month, 2, hour - 5, tzinfo=timezone.utc).astimezone(new_york)
+                    self.assertEqual(tick.hour, host_hour)
+                    self.assertEqual(tick.day, 1 if host_hour >= 20 else 2)
+                    self.assertTrue(scheduled_hour((hour,), tick))
+                    self.assertFalse(scheduled_hour((hour,), tick.replace(hour=host_hour - 1)))
+
+    @patch('newspaper_pilot.run')
+    @patch('newspaper_pilot.verify_private_site')
+    def test_scheduled_collection_skips_off_hours_and_checks_privacy_before_writes(self, verify, run):
+        with tempfile.TemporaryDirectory() as directory:
+            data = Path(directory) / 'data'
+            with patch('sys.argv', ['newspaper_pilot.py', '--data-dir', str(data), '--scheduled']):
+                with patch('newspaper_pilot.scheduled_hour', return_value=False):
+                    self.assertEqual(main(), 0)
+                verify.assert_not_called()
+                self.assertFalse(data.exists())
+                with patch('newspaper_pilot.scheduled_hour', return_value=True), \
+                     patch('newspaper_pilot.configure_logging'), self.assertLogs(level='ERROR'):
+                    verify.side_effect = ValueError('Team login unavailable')
+                    self.assertEqual(main(), 1)
+            run.assert_not_called()
+
+    @patch('newspaper_pilot.verify_private_site')
+    @patch('newspaper_pilot.run')
+    def test_collection_with_no_processed_pages_returns_failure(self, run, verify):
+        run.return_value = {'status': 'collected', 'editions': [{'pagesProcessed': 0}]}
+        with patch('sys.argv', ['newspaper_pilot.py', '--data-dir', 'unused']), \
+             patch('builtins.print'), self.assertLogs(level='ERROR'):
+            self.assertEqual(main(), 1)
+        verify.assert_called_once()
 
     def test_truncated_publisher_jpeg_is_flagged_instead_of_reported_complete(self):
         output = io.BytesIO(); Image.new('RGB', (60, 60), 'white').save(output, 'JPEG')

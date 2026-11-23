@@ -11,6 +11,7 @@ import fcntl
 import hashlib
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import re
@@ -25,6 +26,7 @@ from zoneinfo import ZoneInfo
 from bs4 import BeautifulSoup
 
 PKT = ZoneInfo('Asia/Karachi')
+OFFICIAL_RUN_HOUR = 6
 AGENT = 'MeritXTenderDesk/1.0 (+https://tenders.meritxsc.com/)'
 ALLOWED_HOSTS = {'epads.gov.pk', 'www.epads.gov.pk', 'pa.epads.gov.pk',
                  'pitb.gov.pk', 'www.pitb.gov.pk', 'eproc.punjab.gov.pk', 'ep.punjab.gov.pk',
@@ -61,6 +63,21 @@ def clean(value):
 
 def iso_now():
     return datetime.now(PKT).isoformat(timespec='seconds')
+
+
+def scheduled_hour(hours, now=None):
+    # Native cron wakes hourly in the host timezone. Collection follows PKT,
+    # including when the host transitions between standard and daylight time.
+    return (now or datetime.now(PKT)).astimezone(PKT).hour in hours
+
+
+def configure_logging(log_file=None):
+    options = {}
+    if log_file is not None:
+        os.umask(0o077)
+        log_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        options['handlers'] = [RotatingFileHandler(log_file, maxBytes=512_000, backupCount=2, encoding='utf-8')]
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', **options)
 
 
 def parse_date(value):
@@ -534,7 +551,7 @@ def publish_feed(db, data_dir, now):
         tenders.append(item)
     merge_advertisements(tenders)
     feed = {'schemaVersion': 1, 'generatedAt': now,
-            'schedule': {'time': '06:00', 'timezone': 'Asia/Karachi', 'frequency': 'daily'},
+            'schedule': {'time': f'{OFFICIAL_RUN_HOUR:02}:00', 'timezone': PKT.key, 'frequency': 'daily'},
             'coverageNote': 'Federal EPADS, selected Punjab notices and selected official advertisement copies. Full newspaper edition coverage is pending.',
             'sources': sources, 'tenders': tenders}
     if db.execute("SELECT 1 FROM sqlite_master WHERE name='newspaper_pilot'").fetchone():
@@ -615,9 +632,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data-dir', type=Path, default=Path(__file__).resolve().parent / 'data')
     parser.add_argument('--detail-limit', type=int, default=120)
+    parser.add_argument('--scheduled', action='store_true', help='Run only at 06:00 Asia/Karachi from hourly cron')
     arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+    if arguments.scheduled and not scheduled_hour((OFFICIAL_RUN_HOUR,)):
+        raise SystemExit(0)
+    configure_logging(arguments.data_dir / 'official-cron.log' if arguments.scheduled else None)
+    if arguments.scheduled:
+        logging.info('Scheduled official collection started at %s', iso_now())
     result = run(arguments.data_dir, max(0, min(arguments.detail_limit, 250)))
-    print(json.dumps(result))
+    summary = json.dumps(result)
+    if arguments.scheduled:
+        logging.info('%s', summary)
+    print(summary)
     if result.get('connectedSources') == 0 and not result.get('skipped'):
         raise SystemExit(1)

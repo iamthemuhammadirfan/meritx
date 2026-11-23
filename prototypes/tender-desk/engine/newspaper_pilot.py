@@ -27,11 +27,13 @@ from urllib.robotparser import RobotFileParser
 
 from bs4 import BeautifulSoup
 from PIL import Image, ImageOps, ImageFile
-from collector import PKT, AGENT, clean, classify_newspaper, connect_db, infer_location, iso_now, publish_feed, update_records
+from collector import (AGENT, PKT, classify_newspaper, clean, configure_logging, connect_db,
+                       infer_location, iso_now, publish_feed, scheduled_hour, update_records)
 
 HOSTS = {'epaper.dawn.com', 'e.dawn.com', 'e.jang.com.pk', 'www.express.com.pk', 'express.com.pk'}
 MAX_PAGES = 48
 MAX_BYTES = 12_000_000
+NEWSPAPER_RUN_HOURS = (8, 21)
 OCR_VERSION = 'tesseract-ads-v1'
 TENDER = re.compile(r'\b(?:tenders?|bidding|pre[- ]?qualification|expression[s]? of interest|procurement notice|request for (?:proposal|quotation))\b|ٹینڈر|ٹنڈر|بولی|پیشگی اہلیت', re.I)
 CONTEXT = re.compile(r'\b(?:submit|submission|bids?|quotations?|procurement|sealed|supply|supplies|closing|purchase|contract|security|proposals?)\b|جمع|خرید|فراہم|نیلام|دستاویز|مہر بند', re.I)
@@ -467,20 +469,39 @@ def run(data_dir, start=False, requested_day=None, tessdata=None, seconds=900):
         return {'status': 'collected', 'date': day.isoformat(), 'editions': outcomes, 'requests': client.requests}
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data-dir', type=Path, required=True)
     parser.add_argument('--start', action='store_true', help='Begin the seven-day pilot today; never resets an existing pilot')
     parser.add_argument('--date', type=date.fromisoformat, help='Retry an elapsed day within the pilot window')
     parser.add_argument('--tessdata', type=Path)
     parser.add_argument('--seconds', type=int, default=900)
-    parser.add_argument('--site-origin', default='https://tenders.meritxsc.com', help='Anonymous API access must return 401 before --start')
+    parser.add_argument('--scheduled', action='store_true', help='Run only at 08:00 or 21:00 Asia/Karachi from hourly cron')
+    parser.add_argument('--site-origin', default='https://tenders.meritxsc.com', help='Anonymous API access must return 401 before collection')
     args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+    if args.scheduled:
+        if args.start or args.date:
+            parser.error('--scheduled cannot be combined with --start or --date')
+        if not scheduled_hour(NEWSPAPER_RUN_HOURS):
+            return 0
+    configure_logging(args.data_dir / 'newspaper-cron.log' if args.scheduled else None)
+    if args.scheduled:
+        logging.info('Scheduled newspaper collection started at %s', iso_now())
     try:
-        if args.start:
-            verify_private_site(args.site_origin)
-        print(json.dumps(run(args.data_dir.resolve(), args.start, args.date, args.tessdata, max(30, min(1200, args.seconds)))))
+        verify_private_site(args.site_origin)
+        result = run(args.data_dir.resolve(), args.start, args.date, args.tessdata, max(30, min(1200, args.seconds)))
     except Exception as error:
         logging.error('Newspaper pilot did not run: %s', error)
-        raise SystemExit(1)
+        return 1
+    summary = json.dumps(result)
+    if args.scheduled:
+        logging.info('%s', summary)
+    print(summary)
+    if result.get('status') == 'collected' and not any(edition['pagesProcessed'] for edition in result['editions']):
+        logging.error('Newspaper collection processed no pages')
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
