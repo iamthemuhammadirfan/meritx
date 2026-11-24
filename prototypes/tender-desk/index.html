@@ -9,7 +9,7 @@
   <title>MeritX Tender Desk</title>
   <link rel="stylesheet" href="/assets/heroui.bundle.css?v=hero-workspace-3">
   <link rel="stylesheet" href="/assets/workspace.css?v=hero-workspace-3">
-  <link rel="stylesheet" href="/assets/dashboard.css?v=hero-workspace-4">
+  <link rel="stylesheet" href="/assets/dashboard.css?v=pursuits-1">
   <script src="/assets/appearance.js?v=hero-workspace-3" defer></script>
   <script src="/assets/lucide-0.468.0.min.js" defer></script>
 </head>
@@ -26,6 +26,7 @@
         <button class="cursor-interaction" data-view="closing"><i data-lucide="clock-3" aria-hidden="true"></i>Closing soon</button>
         <button class="cursor-interaction" data-view="changes"><i data-lucide="bell" aria-hidden="true"></i>Changes<span class="mx-nav-count" id="mx-changes-count">0</span></button>
         <div class="mx-nav-label">Workspace</div>
+        <button class="cursor-interaction" data-view="pursuits"><i data-lucide="clipboard-check" aria-hidden="true"></i>Pursuits</button>
         <button class="cursor-interaction" data-view="sources"><i data-lucide="radio" aria-hidden="true"></i>Sources</button>
         <button class="cursor-interaction" data-view="review"><i data-lucide="newspaper" aria-hidden="true"></i>Newspaper review</button>
         <button class="cursor-interaction" data-view="profile"><i data-lucide="building-2" aria-hidden="true"></i>Company profile</button>
@@ -95,6 +96,12 @@
           <div id="mx-pilot" class="mx-pilot" hidden></div>
           <div id="mx-source-list"></div>
         </section>
+        <section id="mx-pursuits-view" class="mx-panel" hidden aria-label="Shared bid reviews">
+          <h2>Shared bid reviews</h2>
+          <p id="mx-pursuits-status" role="status"></p>
+          <div id="mx-pursuits-list" class="mx-pursuits-list"></div>
+          <button type="button" class="button button--outline button--sm" data-retry-pursuits hidden>Retry loading reviews</button>
+        </section>
         <section id="mx-profile-view" class="mx-panel" hidden aria-label="Company profile deferred">
           <h2>Company details</h2><p>The brief already focuses on MeritX’s service areas. Add your supporting details when you are ready to check eligibility against individual tenders.</p>
           <div class="mx-profile-items"><div>Service areas<span>Equipment · Networking · CCTV · Software · IT support</span></div><div>Preferred coverage<span>Lahore priority · Punjab + federal</span></div><div>Company registrations<span>To add later</span></div><div>Experience &amp; completed projects<span>To add later</span></div><div>Supplier authorizations<span>To add later</span></div><div>Financial &amp; delivery capacity<span>To add later</span></div></div>
@@ -105,7 +112,7 @@
   </div>
 </div>
 <div id="mx-tender-sheet"></div>
-<script src="/assets/tender-details.bundle.js?v=hero-workspace-3" defer></script>
-<script src="/assets/dashboard.js?v=hero-workspace-3" defer></script>
+<script src="/assets/tender-details.bundle.js?v=pursuits-1" defer></script>
+<script src="/assets/dashboard.js?v=pursuits-1" defer></script>
 </body>
 </html>

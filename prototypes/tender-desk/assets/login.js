@@ -3,8 +3,10 @@
   globalThis.lucide?.createIcons();
   const activation = location.pathname === '/activate';
   const token = activation ? location.hash.slice(1) : '';
-  const tender = activation ? null : new URLSearchParams(location.hash.slice(1)).get('tender');
-  const detailHash = tender && /^[a-z0-9_-]{1,99}$/i.test(tender) ? `#tender=${encodeURIComponent(tender)}` : '';
+  const detail = new URLSearchParams(location.hash.slice(1));
+  const tender = activation ? null : detail.get('tender');
+  const detailHash = tender && /^[a-z0-9_-]{1,99}$/i.test(tender)
+    ? `#tender=${encodeURIComponent(tender)}${detail.get('review') === '1' ? '&review=1' : ''}` : '';
   if (activation && location.hash) history.replaceState(null, '', location.pathname);
   const form = document.querySelector('#access-form');
   const password = document.querySelector('#password');

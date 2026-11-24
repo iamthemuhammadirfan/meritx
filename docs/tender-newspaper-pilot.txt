@@ -73,7 +73,7 @@ This prints one private activation link. The actual administrator opens it and
 sets their password. Use invite-admin only for an existing store's offline
 recovery. Never run init-admin against an existing store to reset it.
 
-Stage auth.cjs and server.cjs under api/, app.cjs, package.json, index.html,
+Stage auth.cjs, server.cjs and pursuits.cjs under api/, app.cjs, package.json, index.html,
 login.html, team.html and assets/ outside the web document root. Keep the
 existing Node 22 app mapping, DNS and HTTPS. Restart the actual account-owned
 process and verify that sessions survive a process restart.

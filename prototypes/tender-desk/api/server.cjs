@@ -6,6 +6,7 @@ const os = require('node:os');
 const { createHash } = require('node:crypto');
 const { gzipSync } = require('node:zlib');
 const { TeamStore, AuthError, SESSION_MS } = require('./auth.cjs');
+const { PursuitStore, tenderId } = require('./pursuits.cjs');
 
 const MAX_FEED_BYTES = 12_000_000;
 const MAX_AGE_MS = 36 * 3600 * 1000;
@@ -94,10 +95,18 @@ class SnapshotStore {
     this.variants.clear();
   }
 
-  async read(compressed = false) {
+  load() {
     // Concurrent requests share filesystem refresh work.
-    this.loading ??= this.refresh().finally(() => { this.loading = null; });
-    await this.loading;
+    return this.loading ??= this.refresh().finally(() => { this.loading = null; });
+  }
+
+  async tender(id) {
+    await this.load();
+    return this.payload.tenders.find(item => item.id === id);
+  }
+
+  async read(compressed = false) {
+    await this.load();
     // A newspaper refresh must not hide an overdue official-source collector.
     const overdue = this.payload.sources.filter(source => !source.edition && source.status === 'connected' &&
       source.lastSuccessAt && this.clock() - Date.parse(source.lastSuccessAt) > MAX_AGE_MS).map(source => source.key);
@@ -148,6 +157,7 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
   logError = () => console.warn('Tender snapshot unavailable'),
 } = {}) {
   const store = new SnapshotStore(snapshot, clock);
+  const pursuits = new PursuitStore(team.filename, clock);
   const assets = path.join(frontend, 'assets');
   const originUrl = new URL(publicOrigin);
   if (originUrl.protocol !== 'https:' && !(originUrl.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(originUrl.hostname))) throw new Error('Team access requires HTTPS or a loopback preview');
@@ -170,8 +180,13 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
       if (!pathname.startsWith('/') || pathname.includes('\0') || pathname.includes('\\')) throw new Error('Invalid path');
     } catch { return send(400, 'Invalid path'); }
     if (pathname === '/healthz') return json(200, { status: 'ok' });
-    const authRoute = ['/api/auth/login', '/api/auth/activate', '/api/auth/logout', '/api/team/invite', '/api/team/disable'].includes(pathname);
-    if (!['GET', 'HEAD'].includes(request.method) && !(request.method === 'POST' && authRoute)) return send(405, 'Method not allowed', { Allow: authRoute ? 'POST' : 'GET, HEAD' });
+    const pursuitRoute = pathname === '/api/pursuits' || pathname === '/api/pursuits/review';
+    const acceptsPost = pursuitRoute || ['/api/auth/login', '/api/auth/activate', '/api/auth/logout', '/api/team/invite', '/api/team/disable'].includes(pathname);
+    const readOnly = ['GET', 'HEAD'].includes(request.method) && pathname !== '/api/pursuits/review';
+    if (!readOnly && !(acceptsPost && request.method === 'POST')) {
+      const allow = pathname === '/api/pursuits' ? 'GET, HEAD, POST' : acceptsPost ? 'POST' : 'GET, HEAD';
+      return send(405, 'Method not allowed', { Allow: allow });
+    }
     const secret = (request.headers.cookie || '').split(';').map(part => part.trim()).find(part => part.startsWith(cookieName + '='))?.slice(cookieName.length + 1) || '';
     const publicFile = ['/login', '/activate'].includes(pathname);
     let session;
@@ -181,12 +196,12 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
         let size = 0, chunks = [];
         for await (const chunk of request) {
           size += chunk.length;
-          if (size > 4096) return json(413, { error: 'Request is too large.' });
+          if (size > (pathname === '/api/pursuits/review' ? 196_608 : 4096)) return json(413, { error: 'Request is too large.' });
           chunks.push(chunk);
         }
         let input;
         try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!isObject(input)) throw new Error(); }
-        catch { return json(400, { error: 'Enter valid account details.' }); }
+        catch { return json(400, { error: pursuitRoute ? 'The bid review request could not be read.' : 'Enter valid account details.' }); }
         if (pathname === '/api/auth/login' || pathname === '/api/auth/activate') {
           const remote = request.socket.remoteAddress || 'unknown'; // Never trust arbitrary forwarded IP headers.
           const result = pathname.endsWith('/login') ? await team.login(input.email, input.password, remote) : await team.activate(input.token, input.password, remote);
@@ -195,6 +210,16 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
         session = await team.authenticate(secret);
         if (!session) return json(401, { error: 'Please sign in.' });
         if (request.headers['x-csrf-token'] !== session.csrf) return json(403, { error: 'Reload this page and try again.' });
+        if (pursuitRoute) {
+          const id = tenderId(input);
+          if (pathname === '/api/pursuits/review') return json(200, { pursuit: pursuits.save(id, input, session.user) });
+          const existing = pursuits.find(id);
+          if (existing) return json(200, { pursuit: existing });
+          const tender = await store.tender(id);
+          if (!tender) return json(404, { error: 'This tender is unavailable in the current feed.' });
+          const result = pursuits.create(tender, session.user);
+          return json(result.created ? 201 : 200, { pursuit: result.pursuit });
+        }
         if (pathname === '/api/auth/logout') {
           await team.logout(secret);
           return json(200, { status: 'signed-out' }, { 'Set-Cookie': cookie('', 0) });
@@ -213,6 +238,7 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
         if (!session) return pathname === '/' || pathname === '/team' ? send(302, '', { Location: '/login' }) : json(401, { error: 'Please sign in.' });
       }
       if (pathname === '/api/auth/session') return json(200, session);
+      if (pathname === '/api/pursuits') return json(200, { pursuits: pursuits.list() });
       if (/^\/api\/evidence\/[a-f0-9]{64}\.png$/.test(pathname)) {
         try {
           const root = await fs.realpath(evidenceRoot);
@@ -232,7 +258,8 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
       }
       if (pathname === '/team' && session.user.role !== 'admin') return send(403, 'Administrator access is required.');
     } catch (error) {
-      return json(error instanceof AuthError ? error.status : 503, { error: error instanceof AuthError ? error.message : 'Team access is temporarily unavailable. Please try again shortly.' });
+      const unavailable = pursuitRoute ? 'Bid reviews are temporarily unavailable. Please try again shortly.' : 'Team access is temporarily unavailable. Please try again shortly.';
+      return json(error instanceof AuthError ? error.status : 503, { error: error instanceof AuthError ? error.message : unavailable });
     }
     if (pathname === '/api/tenders' || pathname === '/readyz') {
       const accept = request.headers['accept-encoding'] || '';
@@ -272,6 +299,7 @@ function createServer({ snapshot = process.env.MERITX_FEED_PATH || path.join(os.
   server.requestTimeout = 15000;
   server.headersTimeout = 10000;
   server.maxHeadersCount = 60;
+  server.on('close', () => pursuits.close());
   return server;
 }
 

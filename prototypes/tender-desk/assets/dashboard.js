@@ -6,9 +6,10 @@
     const id = new URLSearchParams(location.hash.slice(1)).get('tender');
     return id && /^[a-z0-9_-]{1,99}$/i.test(id) ? id : null;
   }
+  const reviewFromHash = () => new URLSearchParams(location.hash.slice(1)).get('review') === '1';
   function redirectToLogin() {
     const id = tenderFromHash();
-    location.replace(id ? `/login#tender=${encodeURIComponent(id)}` : '/login');
+    location.replace(id ? `/login#tender=${encodeURIComponent(id)}${reviewFromHash() ? '&review=1' : ''}` : '/login');
   }
   let session;
   try {
@@ -33,6 +34,7 @@
     shortlist: ['Shortlist', 'Saved opportunities in this browser.', 'Shortlist'],
     closing: ['Closing soon', 'Known submission deadlines in the next seven days.', 'Closing soon'],
     changes: ['Tender changes', 'Amendments and changes observed during collection.', 'Changes'],
+    pursuits: ['Pursuits', 'Decide which tenders to bid on and track the evidence that supports each decision.', 'Pursuits'],
     sources: ['Tender sources', 'Collection status and coverage for each source.', 'Sources'],
     review: ['Newspaper review', 'Check extracted candidates against their original advertisements.', 'Newspaper review'],
     profile: ['Company profile', 'MeritX service areas and preferred coverage.', 'Company profile'],
@@ -43,6 +45,10 @@
   let error = '';
   let requestInProgress = false;
   let lastCheck = null;
+  const pursuits = new Map();
+  const decisionLabels = { 'in-review': 'In review', bid: 'Bid', hold: 'Hold', 'no-bid': 'No bid' };
+  let pursuitStatus = 'Loading bid reviews…';
+  let pursuitError = false;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const icon = name => `<i data-lucide="${name}" aria-hidden="true"></i>`;
   const publisherHosts = new Set(['epaper.dawn.com', 'e.dawn.com', 'e.jang.com.pk', 'www.express.com.pk', 'express.com.pk']);
@@ -56,6 +62,52 @@
   function safeSourceLink(value) {
     const address = safeSourceAddress(value);
     return address ? `<a href="${esc(address)}" target="_blank" rel="noopener noreferrer">Open source ↗</a>` : '';
+  }
+  async function pursuitRequest(path, input) {
+    const response = await fetch(path, { cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(15000),
+      ...(input && { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': session.csrf }, body: JSON.stringify(input) }) });
+    if (response.status === 401) redirectToLogin();
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 409) loadPursuits();
+      throw new Error(data.error || 'The bid review could not be loaded. Try again.');
+    }
+    return data;
+  }
+  function keepPursuit(pursuit) {
+    const id = pursuit.tender.id;
+    if ((pursuits.get(id)?.revision || 0) <= pursuit.revision) pursuits.set(id, pursuit);
+    return pursuit;
+  }
+  let loadingPursuits = false;
+  async function loadPursuits() {
+    if (loadingPursuits) return;
+    loadingPursuits = true;
+    try {
+      const result = await pursuitRequest('/api/pursuits');
+      result.pursuits.forEach(keepPursuit);
+      pursuitStatus = '';
+      pursuitError = false;
+    } catch {
+      pursuitError = true;
+      pursuitStatus = 'Shared reviews could not be refreshed.';
+    } finally {
+      loadingPursuits = false;
+      if (root.childElementCount) { renderPursuits(); updateTenderSheet(); }
+    }
+  }
+  async function pursueTender(tenderId) {
+    const { pursuit } = await pursuitRequest('/api/pursuits', { tenderId });
+    keepPursuit(pursuit);
+    renderPursuits();
+    updateTenderSheet();
+  }
+  async function saveReview({ tender, revision, decision, reason, requirements }) {
+    const { pursuit } = await pursuitRequest('/api/pursuits/review', { tenderId: tender.id, revision, decision, reason, requirements });
+    keepPursuit(pursuit);
+    renderPursuits();
+    updateTenderSheet();
+    return pursuit;
   }
   const pakistanDate = new Intl.DateTimeFormat('en', { timeZone: 'Asia/Karachi', year: 'numeric', month: '2-digit', day: '2-digit' });
   const shortDate = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', day: 'numeric', month: 'short' });
@@ -132,7 +184,7 @@
     $('#mx-pilot').hidden = !pilot;
     if (pilot) $('#mx-pilot').innerHTML = `<h3>Seven-day newspaper pilot</h3><p>${esc(dateText(pilot.startDate))} – ${esc(dateText(pilot.endDate))} · ${esc(pilot.status)} · ${Number(pilot.daysCollected) || 0}/7 days attempted</p><p>${esc(pilot.coverageNote)}</p><div class="mx-pilot-days">${pilot.days.map(day => `<div><strong>${esc(dateText(day.date))}</strong><p>${Number(day.completeEditions) || 0}/${Number(day.expectedEditions) || 0} editions fully processed · ${Number(day.partialEditions) || 0} partial · ${Number(day.unavailableEditions) || 0} unavailable<br>${Number(day.candidates) || 0} candidates · ${Number(day.pagesProcessed) || 0} pages processed</p></div>`).join('')}</div>`;
   }
-  function tenderDetails(tender) {
+  function tenderDetails(tender, retained) {
     const { city, basis } = tender.location;
     const locationNote = basis === 'ad-text' ? ' · mentioned in ad, delivery unverified' :
       basis === 'buyer' ? ' · buyer location, delivery unverified' : basis === 'title' ? ' · from title' : '';
@@ -164,6 +216,8 @@
       source: sourceUrl ? { url: sourceUrl, label: sourceLabel } : null,
       links: [...documentLinks.values()],
       evidenceId: /^[a-f0-9]{64}$/.test(tender.evidenceId || '') ? tender.evidenceId : null,
+      pursuit: pursuits.get(tender.id), retained,
+      openReview: reviewFromHash(),
     };
   }
 
@@ -171,7 +225,7 @@
   let openerSection;
   function restoreTenderFocus() {
     const opener = openerId && openerSection?.querySelector(`[data-tender="${CSS.escape(openerId)}"]`);
-    (opener || $('#mx-search')).focus({ preventScroll: true });
+    (opener || (state.view === 'pursuits' ? $('[data-view="pursuits"]') : $('#mx-search'))).focus({ preventScroll: true });
     openerSection = null;
   }
   function closeTender() {
@@ -189,18 +243,32 @@
       }
       return;
     }
-    const tender = id ? tenders.find(item => item.id === id) : null;
+    const current = id ? tenders.find(item => item.id === id) : null;
+    const tender = current || pursuits.get(id)?.tender;
     if (tender) openerId = id;
     if (id && feed && !tender) {
       detailStatus.textContent = 'This tender is unavailable in the current feed.';
       detailStatus.hidden = false;
     }
     globalThis.renderTenderSheet({
-      detail: tender ? tenderDetails(tender) : null,
+      detail: tender ? tenderDetails(tender, !current) : null,
       onClose: closeTender,
       onAfterClose: restoreTenderFocus,
       onToggleSave: toggleSave,
+      onPursue: pursueTender,
+      onSaveReview: saveReview,
     });
+  }
+  function renderPursuits() {
+    const list = $('#mx-pursuits-list');
+    const focused = list.contains(document.activeElement) && document.activeElement.dataset.tender;
+    const records = [...pursuits.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    $('#mx-pursuits-status').textContent = pursuitStatus || (records.length ? '' : 'Open a tender and select Pursue to start a shared review.');
+    $('[data-retry-pursuits]').hidden = !pursuitError;
+    list.innerHTML = records.map(({ tender, owner, decision, updatedAt }) => `<a class="mx-pursuit-row" href="#tender=${encodeURIComponent(tender.id)}&amp;review=1" data-tender="${esc(tender.id)}" aria-haspopup="dialog">
+      <div><strong>${esc(tender.title)}</strong><span>${esc([tender.reference, owner, `Updated ${dateText(updatedAt)}`].filter(Boolean).join(' · '))}</span></div>
+      <span class="mx-pursuit-decision" data-decision="${esc(decision)}">${esc(decisionLabels[decision])}</span></a>`).join('');
+    if (focused) list.querySelector(`[data-tender="${CSS.escape(focused)}"]`)?.focus({ preventScroll: true });
   }
   function toggleSave(id) {
     const saved = state.saved.includes(id);
@@ -288,10 +356,11 @@
       : feed ? `<div><strong>Feed published</strong> ${esc(dateText(feed.generatedAt, true))}${feed.stale ? ' · Official collection overdue' : ''}</div>
         ${lastCheck ? `<span class="mx-feed-check">Checked at ${esc(clock.format(lastCheck))} PKT</span>` : ''}
         <button type="button" class="mx-feed-sources" data-view="sources">View sources</button>` : '';
-    const listView = !['sources', 'profile'].includes(state.view);
+    const listView = !['sources', 'profile', 'pursuits'].includes(state.view);
     $('#mx-tender-view').hidden = !listView;
     $('#mx-sources-view').hidden = state.view !== 'sources';
     $('#mx-profile-view').hidden = state.view !== 'profile';
+    $('#mx-pursuits-view').hidden = state.view !== 'pursuits';
     $('#mx-search').value = state.search;
     $('#mx-category').value = state.category;
     $('#mx-lahore-first').checked = state.lahoreFirst;
@@ -300,6 +369,7 @@
     $('#mx-sort-label').textContent = state.lahoreFirst ? 'Lahore first · by deadline' : 'Nearest known deadline';
     if (isOverview) renderOverview(upcoming);
     renderSources();
+    if (state.view === 'pursuits') renderPursuits();
     if (listView) {
       const visible = visibleTenders();
       $('#mx-result-count').textContent = loading ? 'Loading opportunities…' : `${visible.length} ${visible.length === 1 ? 'opportunity' : 'opportunities'}`;
@@ -315,7 +385,7 @@
       }
     }
     if (globalThis.lucide?.createIcons) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } });
-    if (focusTender) (active.closest('#mx-upcoming') || $('#mx-results')).querySelector(`[data-tender="${CSS.escape(focusTender)}"]`)?.focus({ preventScroll: true });
+    if (focusTender) (active.closest('#mx-upcoming, #mx-pursuits-list') || $('#mx-results')).querySelector(`[data-tender="${CSS.escape(focusTender)}"]`)?.focus({ preventScroll: true });
     if (focusSave) $('#mx-results').querySelector(`[data-save="${CSS.escape(focusSave)}"]`)?.focus({ preventScroll: true });
     updateTenderSheet();
   }
@@ -350,15 +420,16 @@
   }
   root.addEventListener('click', event => {
     const noticeLink = event.target.closest('a[data-tender]');
-    if (noticeLink) openerSection = noticeLink.closest('#mx-upcoming, #mx-results');
+    if (noticeLink) openerSection = noticeLink.closest('#mx-upcoming, #mx-results, #mx-pursuits-list');
     const button = event.target.closest('button');
     if (!button || !root.contains(button) || !Object.keys(button.dataset).length) return;
-    if (button.dataset.view) { state.adsOnly = false; state.view = button.dataset.view; state.search = ''; state.region = 'all'; state.category = ['shortlist', 'review'].includes(state.view) ? 'all' : 'relevant'; state.limit = 20; announce(''); window.scrollTo(0, 0); }
+    if (button.dataset.view) { state.adsOnly = false; state.view = button.dataset.view; state.search = ''; state.region = 'all'; state.category = ['shortlist', 'review'].includes(state.view) ? 'all' : 'relevant'; state.limit = 20; announce(''); window.scrollTo(0, 0); if (state.view === 'pursuits') loadPursuits(); }
     else if (button.dataset.region) { state.region = button.dataset.region; state.limit = 20; }
     else if (button.dataset.save) { toggleSave(button.dataset.save); return; }
     else if (button.dataset.reset) { state.adsOnly = false; state.view = 'daily'; state.region = 'all'; state.category = 'relevant'; state.search = ''; state.limit = 20; }
     else if (button.dataset.more) { state.limit += 20; }
     else if (button.dataset.retry) { announce('Retrying the tender feed…'); loadFeed(); return; }
+    else if (Object.hasOwn(button.dataset, 'retryPursuits')) { loadPursuits(); return; }
     render(); persist();
   });
   $('#mx-refresh').addEventListener('click', loadFeed);
@@ -368,7 +439,8 @@
   $('#mx-lahore-first').addEventListener('change', event => { state.lahoreFirst = event.target.checked; render(); persist(); });
   window.addEventListener('hashchange', updateTenderSheet);
   window.addEventListener('storage', event => { if (event.key === storageKey) { restore(); render(); } });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadFeed(); });
-  setInterval(() => { if (!document.hidden) loadFeed(); }, 300000);
-  restore(); render(); loadFeed();
+  function refreshVisibleDesk() { if (!document.hidden) { loadFeed(); loadPursuits(); } }
+  document.addEventListener('visibilitychange', refreshVisibleDesk);
+  setInterval(refreshVisibleDesk, 300000);
+  restore(); render(); loadFeed(); loadPursuits();
 })();

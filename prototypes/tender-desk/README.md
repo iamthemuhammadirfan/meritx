@@ -16,6 +16,12 @@ Service matches use explainable title keywords for equipment, networking, CCTV, 
 
 Company details, tenant accounts, shared shortlists, subscriptions and eligibility checks are deferred. The current shortlist stays in each browser. The catalog is publicly readable; search-indexing exclusions are not access controls. See `docs/tender-platform-plan.txt` for newspaper intake and the commercial product plan.
 
+## Shared bid reviews
+
+On development, select **Pursue** in a tender’s details to create a shared review. **Pursuits** reopens reviews even after a notice leaves the feed. The signed-in teammate who first pursues a tender is its recorded owner. Members can record requirements with page or clause references, add evidence notes and follow-up actions, and save a Bid, Hold or No bid decision with a reason. If the feed still carries the notice, the drawer displays its current deadline and source links.
+
+The app creates `pursuits/reviews.sqlite3` next to the private team-store file on first use. Keep the directory writable by the app account and outside document roots. Retain and back up this database independently of the feed. The Node 22 runtime needs built-in `node:sqlite` support. For the container, persist the writable `/private` directory containing `team.json` and the pursuit store.
+
 ## Public application and private collector
 
 The current live release serves `index.html`, `assets/` and `/api/tenders` from the private Node application root at `~/meritx-tender-web/releases/9d5ac48/`. The subdomain document root contains routing/security configuration only. `/api/tenders.php` is retired. Fonts and Lucide, including their licenses, are self-hosted. The browser loads the snapshot on opening and refreshes it every five minutes while visible; it never launches a crawl.

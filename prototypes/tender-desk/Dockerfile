@@ -8,7 +8,7 @@ RUN npm run build
 FROM node:22-bookworm-slim
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=8080 MERITX_FEED_PATH=/data/feed.json MERITX_TEAM_PATH=/private/team.json
 WORKDIR /app
-COPY api/server.cjs api/auth.cjs /app/api/
+COPY api/server.cjs api/auth.cjs api/pursuits.cjs /app/api/
 COPY app.cjs package.json /app/
 COPY index.html login.html team.html /app/
 COPY assets/ /app/assets/

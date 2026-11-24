@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
+import BidReview from './bid-review.jsx';
 
 function SourceLinks({ source, links, evidenceId }) {
   const [feedback, setFeedback] = useState('');
@@ -33,10 +34,27 @@ function SourceLinks({ source, links, evidenceId }) {
   );
 }
 
-function TenderDetails({ detail, descriptionId, onToggleSave }) {
-  const { tender, facts, source, links, evidenceId, saved, dateText } = detail;
+function TenderDetails({ detail, descriptionId, onToggleSave, onPursue, onSaveReview, onDirtyChange, confirmClose }) {
+  const { tender, facts, source, links, evidenceId, saved, dateText, pursuit, openReview, retained } = detail;
   const match = tender.matches[0];
   const warning = tender.deadlineWarning || tender.detailWarning;
+  const formId = useId();
+  const [reviewOpen, setReviewOpen] = useState(openReview);
+  const [pursuing, setPursuing] = useState(false);
+  const [pursuitError, setPursuitError] = useState('');
+  async function openBidReview() {
+    if (pursuing) return;
+    setPursuing(true);
+    setPursuitError('');
+    try {
+      if (!pursuit) await onPursue(tender.id);
+      setReviewOpen(true);
+    } catch (error) { setPursuitError(error.message); }
+    finally { setPursuing(false); }
+  }
+  function closeReview() {
+    if (confirmClose()) setReviewOpen(false);
+  }
   return (
     <>
       <Drawer.Header className="mx-sheet-head">
@@ -45,7 +63,16 @@ function TenderDetails({ detail, descriptionId, onToggleSave }) {
         <p className="mx-sheet-description" id={descriptionId}>{tender.buyer || tender.sourceName}</p>
         <Drawer.CloseTrigger className="mx-sheet-close" aria-label="Close tender details" />
       </Drawer.Header>
-      <Drawer.Body className="mx-sheet-body">
+      {reviewOpen && pursuit ? <BidReview pursuit={pursuit} onSave={onSaveReview} onBack={closeReview}
+        onDirtyChange={onDirtyChange} formId={formId}>
+        {retained && <p className="mx-sheet-warning">This notice is absent from the current feed. Verify the saved deadline and documents with the issuer.</p>}
+        {warning && <p className="mx-sheet-warning">{warning}</p>}
+        <div className="mx-review-source">
+          <p><strong>Submission deadline</strong> · {facts[0][1]}</p>
+          <details><summary>Tender documents</summary><SourceLinks source={source} links={links} evidenceId={evidenceId} /></details>
+        </div>
+      </BidReview> : <><Drawer.Body className="mx-sheet-body">
+        {retained && <p className="mx-sheet-warning">This notice is absent from the current feed. Verify the saved deadline and documents with the issuer.</p>}
         {tender.reviewStatus === 'needs-review' && <p className="mx-sheet-warning">Review the newspaper ad before relying on its requirements or submission date.</p>}
         {warning && <p className="mx-sheet-warning">{warning}</p>}
         <dl className="mx-tender-facts">
@@ -69,30 +96,44 @@ function TenderDetails({ detail, descriptionId, onToggleSave }) {
           </ul>
         </details>}
       </Drawer.Body>
-      <Drawer.Footer className="mx-sheet-footer">
-        <Button variant="outline" aria-pressed={saved} onPress={() => onToggleSave(tender.id)}>
-          {saved ? 'Remove from shortlist' : 'Add to shortlist'}
-        </Button>
-      </Drawer.Footer>
+      <Drawer.Footer className="mx-sheet-footer mx-bid-footer">
+        {pursuitError && <p className="mx-bid-feedback" data-error="true" role="alert">{pursuitError}</p>}
+        <div className="mx-bid-actions">
+          <Button variant="outline" aria-pressed={saved} onPress={() => onToggleSave(tender.id)}>
+            {saved ? 'Remove from shortlist' : 'Add to shortlist'}
+          </Button>
+          <Button variant="primary" isDisabled={pursuing} onPress={openBidReview}>{pursuing ? 'Opening review…' : pursuit ? 'Open bid review' : 'Pursue'}</Button>
+        </div>
+      </Drawer.Footer></>}
     </>
   );
 }
 
-function TenderDrawer({ detail, onClose, onAfterClose, onToggleSave }) {
+function TenderDrawer({ detail, onClose, onAfterClose, onToggleSave, onPursue, onSaveReview }) {
   const descriptionId = useId();
   const wasOpen = useRef(false);
+  const dirty = useRef(false);
   const isOpen = Boolean(detail);
   useEffect(() => {
     if (wasOpen.current && !isOpen) requestAnimationFrame(onAfterClose);
     wasOpen.current = isOpen;
   }, [isOpen, onAfterClose]);
+  function confirmClose() {
+    if (dirty.current && !window.confirm('Discard unsaved changes to this review?')) return false;
+    dirty.current = false;
+    return true;
+  }
   if (!detail) return null;
   return (
     <Drawer>
-      <Drawer.Backdrop isOpen={isOpen} onOpenChange={open => { if (!open) onClose(); }}>
+      <Drawer.Backdrop isOpen={isOpen} onOpenChange={open => {
+        if (!open && confirmClose()) onClose();
+      }}>
         <Drawer.Content placement="right" className="mx-drawer-content">
           <Drawer.Dialog className="mx-drawer-dialog" aria-describedby={descriptionId}>
-            <TenderDetails detail={detail} descriptionId={descriptionId} onToggleSave={onToggleSave} />
+            <TenderDetails key={detail.tender.id} detail={detail} descriptionId={descriptionId} onToggleSave={onToggleSave}
+              onPursue={onPursue} onSaveReview={onSaveReview}
+              onDirtyChange={value => { dirty.current = value; }} confirmClose={confirmClose} />
           </Drawer.Dialog>
         </Drawer.Content>
       </Drawer.Backdrop>

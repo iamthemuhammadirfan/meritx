@@ -33,11 +33,50 @@ async function account(role = 'admin') {
   return { cookie: result.headers['set-cookie'][0].split(';')[0], csrf: result.json().csrf, user: result.json().user, invite };
 }
 test('anonymous visitors cannot read catalog, readiness, private images or team pages', async () => {
-  for (const url of ['/api/tenders', '/readyz', '/api/auth/session', '/api/team', `/api/evidence/${'a'.repeat(64)}.png`]) assert.equal((await request(url)).status, 401, url);
+  for (const url of ['/api/tenders', '/api/pursuits', '/readyz', '/api/auth/session', '/api/team', `/api/evidence/${'a'.repeat(64)}.png`]) assert.equal((await request(url)).status, 401, url);
   assert.equal((await request('/')).headers.location, '/login');
   assert.equal((await request('/team')).headers.location, '/login');
   assert.equal((await request('/login')).status, 200);
   assert.equal((await request('/healthz')).status, 200);
+});
+test('members share one private pursuit and stale edits cannot overwrite a newer review', async () => {
+  const admin = await account();
+  const member = await account('member');
+  const snapshot = path.join(dir, 'feed.json');
+  const tenderId = 'EPADS-P1';
+  const seed = { schemaVersion: 1, generatedAt: new Date(now).toISOString(), sources: [],
+    tenders: [{ id: tenderId, title: 'Supply of laptops', closingAt: '2026-11-30T10:00:00+05:00',
+      sourceUrl: 'https://epads.gov.pk/notice', documents: [{ label: 'Tender pack', url: 'https://epads.gov.pk/pack' }], internalNote: 'private collector note' }] };
+  await fs.writeFile(snapshot, JSON.stringify(seed));
+  const pursue = { body: { tenderId } };
+  assert.equal((await request('/api/pursuits', pursue)).status, 401);
+  assert.equal((await request('/api/pursuits', { ...pursue, cookie: member.cookie })).status, 403);
+  assert.equal((await request('/api/pursuits', { ...member, body: { tenderId: 'missing' } })).status, 404);
+  const results = await Promise.all([request('/api/pursuits', { ...member, ...pursue }), request('/api/pursuits', { ...admin, ...pursue })]);
+  assert.deepEqual(results.map(result => result.status).sort(), [200, 201]);
+  const first = results[0].json().pursuit;
+  assert.deepEqual(results[1].json().pursuit, first);
+  assert.equal(first.decision, 'in-review');
+  assert.equal(first.tender.internalNote, undefined);
+  const requirements = [{ requirement: 'Three similar contracts', source: 'Bidding document, p. 30', status: 'unverified', evidence: '', followUp: 'Collect signed completion letters' }];
+  const body = { tenderId, revision: first.revision, decision: 'hold', reason: 'Contracts await verification.', requirements };
+  const save = (user, input) => request('/api/pursuits/review', { ...user, body: input });
+  assert.equal((await save(member, { ...body, reason: ' ' })).status, 400);
+  assert.equal((await save(member, { ...body, requirements: [{ ...requirements[0], source: '' }] })).status, 400);
+  const saved = await save(member, body);
+  assert.equal(saved.status, 200);
+  assert.equal(saved.json().pursuit.updatedBy, 'member');
+  assert.equal((await save(admin, body)).status, 409);
+  await fs.unlink(snapshot);
+  await new Promise(resolve => server.close(resolve));
+  server = createServer({ team, snapshot, clock: () => now });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  port = server.address().port;
+  const reopened = await request('/api/pursuits', admin);
+  assert.equal(reopened.headers['cache-control'], 'no-store');
+  assert.deepEqual(reopened.json().pursuits, [saved.json().pursuit]);
+  assert.equal((await request('/api/pursuits', { ...admin, ...pursue })).status, 200);
+  assert.equal((await request('/pursuits/reviews.sqlite3', admin)).status, 404);
 });
 test('activation is single-use and issues a secure cookie without storing plaintext credentials', async () => {
   const user = await account();
